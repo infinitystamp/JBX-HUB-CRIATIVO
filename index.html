@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>JBX HUB — Sistema Operacional</title>
+<title>JBX HUB — DASH CRIATIVOl</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1223,6 +1223,7 @@ body {
       <div class="live-dot" id="live-dot" title="Status da conexão"></div>
       <span style="font-size:11px;color:var(--muted);margin-right:4px;" id="live-label">AO VIVO</span>
       <span class="firebase-badge" id="firebase-badge">LOCAL</span>
+      <span style="font-size:11px;color:var(--green);background:rgba(16,185,129,0.15);padding:4px 8px;border-radius:6px;border:1px solid rgba(16,185,129,0.3);" id="online-counter" title="Usuários online">👥 0 online</span>
 
       <div class="search-bar">
         <span style="color:var(--muted);font-size:14px">🔍</span>
@@ -1977,6 +1978,16 @@ function render() {
   renderUsers();
   updateCharts();
   updateNavBadge();
+  updateOnlineCounter();
+}
+
+function updateOnlineCounter() {
+  const onlineCount = state.users.filter(u => u.online).length;
+  const counter = el('online-counter');
+  if (counter) {
+    counter.textContent = `👥 ${onlineCount} online`;
+    counter.title = `${onlineCount} usuário(s) online agora`;
+  }
 }
 
 function renderStats() {
@@ -2205,13 +2216,17 @@ function renderDetailAttachments(task) {
   if (!task.files || task.files.length === 0) {
     list.innerHTML = `<span style="font-size:11px;color:var(--muted);">Sem anexos</span>`;
   } else {
-    list.innerHTML = task.files.map((f, i) => `
-      <div class="attachment-item">
-        <span class="attach-icon">📎</span>
-        <span style="flex:1;">${f}</span>
-        <button onclick="removeFile('${task.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;">✕</button>
-      </div>
-    `).join('');
+    list.innerHTML = task.files.map((f, i) => {
+      const fileName = typeof f === 'string' ? f : f.name;
+      const fileSize = typeof f === 'string' ? '' : ` (${(f.size / 1024).toFixed(1)}KB)`;
+      return `
+        <div class="attachment-item">
+          <span class="attach-icon">📎</span>
+          <span style="flex:1;font-size:11px;">${fileName}${fileSize}</span>
+          <button onclick="removeFile('${task.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;">✕</button>
+        </div>
+      `;
+    }).join('');
   }
 }
 
@@ -2236,11 +2251,25 @@ function handleFileAttach(input) {
   const id = state.detailTaskId;
   const task = state.tasks.find(t => t.id === id);
   if (!task) return;
-  Array.from(input.files).forEach(f => task.files.push(f.name));
-  renderDetailAttachments(task);
-  saveState();
-  render();
-  toast('Anexo adicionado', 'success');
+  
+  Array.from(input.files).forEach(f => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const fileData = {
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        data: e.target.result // Base64 encoded
+      };
+      if (!task.files) task.files = [];
+      task.files.push(fileData);
+      renderDetailAttachments(task);
+      saveState();
+      render();
+      toast(`"${f.name}" anexado com sucesso!`, 'success');
+    };
+    reader.readAsDataURL(f);
+  });
 }
 
 function removeFile(id, idx) {
