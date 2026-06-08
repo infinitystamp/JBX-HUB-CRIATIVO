@@ -33,7 +33,7 @@
   };
   // ─────────────────────────────────────────────────
 
-  const FIREBASE_ENABLED = FIREBASE_CONFIG.apiKey !== "AIzaSyA5zurcZ2nXayHY9fDerg2lm8tWtIWvepo";
+  const FIREBASE_ENABLED = FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.length > 0 && FIREBASE_CONFIG.databaseURL && FIREBASE_CONFIG.databaseURL.includes('firebaseio.com');
 
   if (FIREBASE_ENABLED) {
     try {
@@ -1564,7 +1564,7 @@ body {
 // ═══════════════════════════════════════════════════════════════
 // ⚙️  CONFIGURAÇÕES EDITÁVEIS
 // ═══════════════════════════════════════════════════════════════
-const DEFAULT_PASSWORD = 'jbx2024'; // Senha padrão de fábrica
+const DEFAULT_PASSWORD = 'jbx2026'; // Senha padrão de fábrica
 
 // ═══════════════════════════════════════════════════════════════
 // STATE
