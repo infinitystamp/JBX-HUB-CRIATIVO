@@ -1012,6 +1012,92 @@ body {
   min-width: 200px;
 }
 .settings-input:focus { border-color: var(--accent); }
+
+/* ══════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS
+   ══════════════════════════════════════════════════ */
+.mobile-menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px 12px;
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .mobile-menu-toggle { display: flex; align-items: center; }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 240px;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+  .sidebar.mobile-open ~ .sidebar-overlay { display: block; }
+  .main { width: 100%; }
+  .topbar { height: 56px; padding: 0 12px; gap: 8px; }
+  .topbar-title { font-size: 14px; }
+  .topbar-actions { gap: 4px; }
+  .btn { padding: 6px 10px; font-size: 11px; }
+  .content { padding: 12px; gap: 12px; }
+  .task-card { padding: 12px; min-height: 80px; }
+  .task-title { font-size: 13px; }
+  .task-tags { flex-wrap: wrap; gap: 4px; }
+  .task-tag { font-size: 10px; padding: 3px 6px; }
+  .modal { width: 95vw !important; max-height: 90vh; border-radius: 16px; }
+  .modal-header { padding: 16px; }
+  .modal-body { padding: 16px; }
+  .modal-footer { padding: 12px 16px; gap: 8px; }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+  button { min-height: 44px; font-size: 14px; }
+  .stats-row { flex-direction: column; }
+  .stat-card { width: 100%; }
+  .kanban-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kanban-column { min-width: 280px; }
+  .users-grid { grid-template-columns: 1fr; }
+  .login-card { width: 95vw; padding: 24px 16px; }
+  .login-logo-mark { width: 40px; height: 40px; font-size: 14px; }
+  .login-logo-text { font-size: 18px; }
+  .login-field input { font-size: 16px; padding: 12px; min-height: 44px; }
+  .login-btn { min-height: 44px; font-size: 14px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-title { font-size: 12px; }
+  .topbar-title span { display: none; }
+  .btn { padding: 5px 8px; font-size: 10px; }
+  .content { padding: 8px; gap: 8px; }
+  .kanban-column { min-width: 260px; }
+  .task-card { padding: 10px; }
+  .modal { width: 98vw !important; }
+}
 </style>
 </head>
 <body>
@@ -1129,6 +1215,7 @@ body {
 <div class="main">
   <!-- TOPBAR -->
   <div class="topbar">
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
     <div class="topbar-title" id="topbar-title">
       Dashboard <span>Visão Geral</span>
     </div>
@@ -1608,6 +1695,21 @@ let fbListenerActive = false;
 // ═══════════════════════════════════════════════════════════════
 // LOGIN / LOGOUT
 // ═══════════════════════════════════════════════════════════════
+// MOBILE MENU TOGGLE
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle('mobile-open');
+  }
+}
+
+function closeMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove('mobile-open');
+  }
+}
+
 function getPassword() {
   return localStorage.getItem('jbxhub_password') || DEFAULT_PASSWORD;
 }
@@ -2401,6 +2503,11 @@ function initApp() {
   tryFirebase();
 
   setInterval(() => { simulateActivity(); }, 8000);
+
+  // Close mobile menu when clicking nav items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', closeMobileMenu);
+  });
 }
 
 // Carrega logo na tela de login antes do app iniciar
