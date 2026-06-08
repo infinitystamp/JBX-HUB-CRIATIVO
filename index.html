@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>JBX HUB — DASH CRIATIVOl</title>
+<title>JBX HUB — Dash Criativo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -1586,7 +1586,11 @@ body {
 <div class="modal-overlay" id="modal-detail" onclick="closeModalOverlay(event,'modal-detail')">
   <div class="modal" style="width:520px;">
     <button class="modal-close-x" onclick="closeModal('modal-detail')">✕</button>
-    <h2 id="detail-title">Título da Tarefa</h2>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <h2 id="detail-title" style="flex:1;cursor:pointer;padding:8px;border-radius:6px;transition:all 0.15s;" onclick="editTaskTitle()" title="Clique para editar">Título da Tarefa</h2>
+      <button class="btn btn-ghost btn-sm" onclick="editTaskTitle()" title="Editar título">✏️</button>
+    </div>
+    <input type="text" id="detail-title-input" style="display:none;width:100%;padding:10px;border:1px solid var(--accent);border-radius:8px;background:#0d1120;color:var(--text);font-size:16px;font-weight:700;margin-bottom:16px;" onkeydown="handleTitleKeydown(event)" onblur="saveTitleEdit()">
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="detail-tags"></div>
 
@@ -2196,19 +2200,72 @@ function openDetail(id) {
   state.detailTaskId = id;
 
   el('detail-title').textContent = task.title;
+  el('detail-title-input').value = task.title;
   el('detail-col').value = task.col;
   el('detail-notes').value = task.notes || '';
 
   const tagsEl = el('detail-tags');
   tagsEl.innerHTML = `
     <span class="task-tag tag-sector">${task.sector}</span>
-    <span class="task-tag tag-priority-${task.priority}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} prioridade</span>
+    <span class="task-tag task-tag tag-priority-${task.priority}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} prioridade</span>
     ${task.urgent ? `<span class="task-tag tag-urgent">🚨 URGENTE</span>` : ''}
     ${task.deadline ? `<span class="task-tag" style="background:rgba(251,191,36,0.1);color:var(--yellow);">📅 ${fmtDate(task.deadline)}</span>` : ''}
   `;
 
   renderDetailAttachments(task);
   openModal('modal-detail');
+}
+
+function editTaskTitle() {
+  const titleEl = el('detail-title');
+  const inputEl = el('detail-title-input');
+  const btnEdit = document.querySelector('[onclick="editTaskTitle()"]');
+  
+  if (inputEl.style.display === 'none') {
+    titleEl.style.display = 'none';
+    inputEl.style.display = 'block';
+    inputEl.focus();
+    inputEl.select();
+  }
+}
+
+function handleTitleKeydown(e) {
+  if (e.key === 'Enter') {
+    saveTitleEdit();
+  } else if (e.key === 'Escape') {
+    cancelTitleEdit();
+  }
+}
+
+function saveTitleEdit() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  
+  const newTitle = el('detail-title-input').value.trim();
+  if (!newTitle) {
+    toast('O título não pode estar vazio', 'error');
+    el('detail-title-input').value = task.title;
+    return;
+  }
+  
+  task.title = newTitle;
+  el('detail-title').textContent = newTitle;
+  el('detail-title').style.display = 'block';
+  el('detail-title-input').style.display = 'none';
+  saveState();
+  render();
+  toast('Título atualizado!', 'success');
+}
+
+function cancelTitleEdit() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (task) {
+    el('detail-title-input').value = task.title;
+    el('detail-title').style.display = 'block';
+    el('detail-title-input').style.display = 'none';
+  }
 }
 
 function renderDetailAttachments(task) {
@@ -2219,11 +2276,14 @@ function renderDetailAttachments(task) {
     list.innerHTML = task.files.map((f, i) => {
       const fileName = typeof f === 'string' ? f : f.name;
       const fileSize = typeof f === 'string' ? '' : ` (${(f.size / 1024).toFixed(1)}KB)`;
+      const hasData = typeof f !== 'string' && f.data;
       return `
         <div class="attachment-item">
           <span class="attach-icon">📎</span>
           <span style="flex:1;font-size:11px;">${fileName}${fileSize}</span>
-          <button onclick="removeFile('${task.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;">✕</button>
+          ${hasData ? `<button onclick="previewFile('${task.id}',${i})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;" title="Visualizar">🔍</button>` : ''}
+          ${hasData ? `<button onclick="downloadFile('${task.id}',${i})" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;" title="Baixar">⬇️</button>` : ''}
+          <button onclick="removeFile('${task.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;" title="Remover">✕</button>
         </div>
       `;
     }).join('');
@@ -2275,6 +2335,62 @@ function handleFileAttach(input) {
 function removeFile(id, idx) {
   const task = state.tasks.find(t => t.id === id);
   if (task) { task.files.splice(idx, 1); renderDetailAttachments(task); saveState(); render(); }
+}
+
+function previewFile(taskId, fileIdx) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task || !task.files[fileIdx]) return;
+  
+  const file = task.files[fileIdx];
+  if (typeof file === 'string') { toast('Arquivo sem dados', 'error'); return; }
+  
+  const fileName = file.name.toLowerCase();
+  const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(fileName);
+  const isPdf = /\.pdf$/i.test(fileName);
+  const isText = /\.(txt|md|json|xml|csv)$/i.test(fileName);
+  
+  let content = '';
+  if (isImage) {
+    content = `<img src="${file.data}" style="max-width:100%;max-height:70vh;border-radius:8px;">`;
+  } else if (isPdf) {
+    content = `<iframe src="${file.data}" style="width:100%;height:70vh;border:none;border-radius:8px;"></iframe>`;
+  } else if (isText) {
+    const text = atob(file.data.split(',')[1] || '');
+    content = `<pre style="background:var(--card);padding:16px;border-radius:8px;overflow-y:auto;max-height:70vh;font-size:12px;">${text}</pre>`;
+  } else {
+    content = `<div style="text-align:center;padding:40px;color:var(--muted);"><div style="font-size:48px;margin-bottom:16px;">📄</div><div>Arquivo: ${file.name}</div><div style="font-size:12px;margin-top:8px;">${(file.size / 1024).toFixed(1)}KB</div><button class="btn btn-primary" onclick="downloadFile('${taskId}',${fileIdx}); closeModal('modal-preview')" style="margin-top:16px;">⬇️ Baixar</button></div>`;
+  }
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'modal-preview';
+  modal.onclick = (e) => { if (e.target === modal) closeModal('modal-preview'); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:90vw;max-height:80vh;overflow:auto;">
+      <button class="modal-close-x" onclick="closeModal('modal-preview')">✕</button>
+      <div style="margin-bottom:16px;">
+        <strong>${file.name}</strong> <span style="color:var(--muted);font-size:12px;">(${(file.size / 1024).toFixed(1)}KB)</span>
+      </div>
+      ${content}
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function downloadFile(taskId, fileIdx) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task || !task.files[fileIdx]) return;
+  
+  const file = task.files[fileIdx];
+  if (typeof file === 'string') { toast('Arquivo sem dados', 'error'); return; }
+  
+  const link = document.createElement('a');
+  link.href = file.data;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast(`"${file.name}" baixado!`, 'success');
 }
 
 function deleteFromDetail() {
