@@ -202,6 +202,20 @@ body {
 .login-btn:hover { background: var(--accent2); }
 .login-btn:active { transform: scale(0.98); }
 
+.login-hint {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 16px;
+}
+.login-hint code {
+  background: var(--card2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+}
+
 /* ── SIDEBAR ── */
 .sidebar {
   width: 240px;
@@ -792,6 +806,56 @@ body {
 .toast.error { border-left: 3px solid var(--red); }
 .toast.info { border-left: 3px solid var(--blue); }
 
+/* ── USERS VIEW ── */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.user-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.2s;
+}
+.user-row:hover { border-color: var(--muted); }
+.user-row-avatar {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.user-row-info { flex: 1; min-width: 0; }
+.user-row-name { font-size: 14px; font-weight: 700; }
+.user-row-email { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 4px;
+  display: inline-block;
+}
+.role-admin { background: rgba(139,92,246,0.2); color: #a78bfa; }
+.role-viewer { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.online-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  box-shadow: 0 0 6px var(--green);
+}
+.offline-dot { background: var(--muted); box-shadow: none; }
+
 /* ── EMPTY STATE ── */
 .empty-state {
   display: flex;
@@ -909,32 +973,31 @@ body {
 .firebase-badge.online { background: rgba(16,185,129,0.15); color: var(--green); }
 .firebase-badge.offline { background: rgba(107,122,153,0.15); color: var(--muted); }
 
-/* ── SETTINGS ── */
+/* ── SETTINGS VIEW ── */
 .settings-section {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 14px;
+  border-radius: 14px;
+  padding: 24px;
 }
 .settings-section h3 {
   font-size: 13px;
   font-weight: 700;
-  color: var(--text);
-  margin-bottom: 16px;
+  color: var(--muted2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-bottom: 16px;
 }
 .settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding-bottom: 14px;
+  gap: 16px;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border);
 }
-.settings-row:last-child { border-bottom: none; padding-bottom: 0; }
-.settings-row-label { font-size: 13px; font-weight: 700; color: var(--text); }
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 13px; font-weight: 700; }
 .settings-row-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .settings-input {
   background: #0d1120;
@@ -950,7 +1013,9 @@ body {
 }
 .settings-input:focus { border-color: var(--accent); }
 
-/* ── MOBILE RESPONSIVENESS ── */
+/* ══════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS
+   ══════════════════════════════════════════════════ */
 .mobile-menu-toggle {
   display: none;
   background: transparent;
@@ -998,6 +1063,9 @@ body {
   .task-tags { flex-wrap: wrap; gap: 4px; }
   .task-tag { font-size: 10px; padding: 3px 6px; }
   .modal { width: 95vw !important; max-height: 90vh; border-radius: 16px; }
+  .modal-header { padding: 16px; }
+  .modal-body { padding: 16px; }
+  .modal-footer { padding: 12px 16px; gap: 8px; }
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -1011,6 +1079,8 @@ body {
   button { min-height: 44px; font-size: 14px; }
   .stats-row { flex-direction: column; }
   .stat-card { width: 100%; }
+  .kanban-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kanban-column { min-width: 280px; }
   .users-grid { grid-template-columns: 1fr; }
   .login-card { width: 95vw; padding: 24px 16px; }
   .login-logo-mark { width: 40px; height: 40px; font-size: 14px; }
@@ -1024,6 +1094,7 @@ body {
   .topbar-title span { display: none; }
   .btn { padding: 5px 8px; font-size: 10px; }
   .content { padding: 8px; gap: 8px; }
+  .kanban-column { min-width: 260px; }
   .task-card { padding: 10px; }
   .modal { width: 98vw !important; }
 }
@@ -1054,6 +1125,10 @@ body {
     <div class="login-error" id="login-error"></div>
 
     <button class="login-btn" onclick="doLogin()">Entrar no Sistema</button>
+
+    <div class="login-hint">
+      Senha padrão: <code>jbx2024</code> — altere em Configurações
+    </div>
   </div>
 </div>
 
@@ -1082,6 +1157,10 @@ body {
       <span class="nav-icon">📋</span>
       <span class="nav-label">Quadro de Tarefas</span>
       <span class="nav-badge" id="nav-badge-total">0</span>
+    </div>
+    <div class="nav-item" onclick="showView('users', this)">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">Usuários</span>
     </div>
     <div class="nav-item" onclick="showView('settings', this)">
       <span class="nav-icon">⚙️</span>
@@ -1121,7 +1200,7 @@ body {
 
   <div class="sidebar-footer">
     <button class="collapse-btn" onclick="toggleSidebar()">⇐ Recolher</button>
-    <div class="user-card">
+    <div class="user-card" onclick="showView('users', null)">
       <div class="user-avatar">A</div>
       <div class="user-info">
         <div class="user-name">Admin</div>
@@ -1144,7 +1223,7 @@ body {
       <div class="live-dot" id="live-dot" title="Status da conexão"></div>
       <span style="font-size:11px;color:var(--muted);margin-right:4px;" id="live-label">AO VIVO</span>
       <span class="firebase-badge" id="firebase-badge">LOCAL</span>
-      <span style="font-size:11px;color:var(--green);background:rgba(16,185,129,0.15);padding:4px 8px;border-radius:6px;border:1px solid rgba(16,185,129,0.3);" id="online-counter" title="Usuários online">👥 1 online</span>
+      <span style="font-size:11px;color:var(--green);background:rgba(16,185,129,0.15);padding:4px 8px;border-radius:6px;border:1px solid rgba(16,185,129,0.3);" id="online-counter" title="Usuários online">👥 0 online</span>
 
       <div class="search-bar">
         <span style="color:var(--muted);font-size:14px">🔍</span>
@@ -1264,18 +1343,14 @@ body {
                 <option value="alta">Prioridade: Alta</option>
                 <option value="baixa">Prioridade: Baixa</option>
               </select>
-              <div class="form-check">
-                <input type="checkbox" id="urgent-solicitado"> 🚨 Marcar como Urgente
-              </div>
-              <div class="form-row">
-                <input type="date" id="date-solicitado" placeholder="Prazo">
-              </div>
+              <label class="form-check"><input type="checkbox" id="urgent-solicitado"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-solicitado" placeholder="Prazo"></div>
               <div class="form-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveTask('solicitado')">Criar</button>
                 <button class="btn btn-ghost btn-sm" onclick="closeForm('solicitado')">Cancelar</button>
               </div>
             </div>
-            <button class="btn-add-task" onclick="openForm('solicitado')">➕ Nova Tarefa</button>
+            <button class="btn-add-task" id="btn-add-solicitado" onclick="openForm('solicitado')">＋ Nova Tarefa</button>
           </div>
         </div>
 
@@ -1299,18 +1374,14 @@ body {
                 <option value="alta">Prioridade: Alta</option>
                 <option value="baixa">Prioridade: Baixa</option>
               </select>
-              <div class="form-check">
-                <input type="checkbox" id="urgent-producao"> 🚨 Marcar como Urgente
-              </div>
-              <div class="form-row">
-                <input type="date" id="date-producao" placeholder="Prazo">
-              </div>
+              <label class="form-check"><input type="checkbox" id="urgent-producao"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-producao"></div>
               <div class="form-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveTask('producao')">Criar</button>
                 <button class="btn btn-ghost btn-sm" onclick="closeForm('producao')">Cancelar</button>
               </div>
             </div>
-            <button class="btn-add-task" onclick="openForm('producao')">➕ Nova Tarefa</button>
+            <button class="btn-add-task" id="btn-add-producao" onclick="openForm('producao')">＋ Nova Tarefa</button>
           </div>
         </div>
 
@@ -1334,18 +1405,14 @@ body {
                 <option value="alta">Prioridade: Alta</option>
                 <option value="baixa">Prioridade: Baixa</option>
               </select>
-              <div class="form-check">
-                <input type="checkbox" id="urgent-aprovacao"> 🚨 Marcar como Urgente
-              </div>
-              <div class="form-row">
-                <input type="date" id="date-aprovacao" placeholder="Prazo">
-              </div>
+              <label class="form-check"><input type="checkbox" id="urgent-aprovacao"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-aprovacao"></div>
               <div class="form-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveTask('aprovacao')">Criar</button>
                 <button class="btn btn-ghost btn-sm" onclick="closeForm('aprovacao')">Cancelar</button>
               </div>
             </div>
-            <button class="btn-add-task" onclick="openForm('aprovacao')">➕ Nova Tarefa</button>
+            <button class="btn-add-task" id="btn-add-aprovacao" onclick="openForm('aprovacao')">＋ Nova Tarefa</button>
           </div>
         </div>
 
@@ -1369,21 +1436,26 @@ body {
                 <option value="alta">Prioridade: Alta</option>
                 <option value="baixa">Prioridade: Baixa</option>
               </select>
-              <div class="form-check">
-                <input type="checkbox" id="urgent-finalizado"> 🚨 Marcar como Urgente
-              </div>
-              <div class="form-row">
-                <input type="date" id="date-finalizado" placeholder="Prazo">
-              </div>
+              <label class="form-check"><input type="checkbox" id="urgent-finalizado"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-finalizado"></div>
               <div class="form-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveTask('finalizado')">Criar</button>
                 <button class="btn btn-ghost btn-sm" onclick="closeForm('finalizado')">Cancelar</button>
               </div>
             </div>
-            <button class="btn-add-task" onclick="openForm('finalizado')">➕ Nova Tarefa</button>
+            <button class="btn-add-task" id="btn-add-finalizado" onclick="openForm('finalizado')">＋ Nova Tarefa</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- ═══════════ USERS VIEW ═══════════ -->
+    <div class="view" id="view-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <h2 style="font-size:15px;font-weight:700;">👥 Gerenciamento de Usuários</h2>
+        <button class="btn btn-primary" onclick="openUserModal()">＋ Criar Usuário</button>
+      </div>
+      <div class="users-grid" id="users-grid"></div>
     </div>
 
     <!-- ═══════════ SETTINGS VIEW ═══════════ -->
@@ -1451,14 +1523,14 @@ body {
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Exportar Dados</div>
-            <div class="settings-row-desc">Baixar todas as tarefas em formato JSON.</div>
+            <div class="settings-row-desc">Baixar todas as tarefas e usuários em formato JSON.</div>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇️ Exportar JSON</button>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label">Limpar Todos os Dados</div>
-            <div class="settings-row-desc">Remove todas as tarefas. Ação irreversível.</div>
+            <div class="settings-row-desc">Remove todas as tarefas e usuários. Ação irreversível.</div>
           </div>
           <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Limpar Tudo</button>
         </div>
@@ -1530,13 +1602,6 @@ body {
       <option value="finalizado">✅ Finalizado</option>
     </select>
 
-    <label>Prioridade</label>
-    <select id="detail-priority" onchange="updateTaskPriority()">
-      <option value="alta">🔴 Alta</option>
-      <option value="media">🟡 Média</option>
-      <option value="baixa">🟢 Baixa</option>
-    </select>
-
     <label>Notas / Observações</label>
     <textarea class="notes-area" id="detail-notes" placeholder="Escreva notas sobre esta tarefa..." rows="3" onchange="saveDetailNotes()"></textarea>
 
@@ -1550,6 +1615,33 @@ body {
     <div class="modal-actions" style="margin-top:16px;">
       <button class="btn btn-danger btn-sm" onclick="deleteFromDetail()">🗑️ Deletar</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-detail')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAL: CRIAR USUÁRIO ═══════════ -->
+<div class="modal-overlay" id="modal-user" onclick="closeModalOverlay(event,'modal-user')">
+  <div class="modal" style="width:400px;">
+    <button class="modal-close-x" onclick="closeModal('modal-user')">✕</button>
+    <h2>👤 Criar Usuário</h2>
+    <label>Nome *</label>
+    <input type="text" id="user-name" placeholder="Nome completo">
+    <label>Email *</label>
+    <input type="email" id="user-email" placeholder="email@empresa.com">
+    <label>Role</label>
+    <select id="user-role">
+      <option value="viewer">Viewer (apenas visualiza)</option>
+      <option value="admin">Admin (gerencia tudo)</option>
+    </select>
+    <label>Setor</label>
+    <select id="user-sector">
+      <option value="">Sem setor específico</option>
+      <option>Loja</option><option>Eventos</option><option>Personalizados</option>
+      <option>Marketplace</option><option>Instituto</option><option>JBX Estruturas</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-user')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Criar</button>
     </div>
   </div>
 </div>
@@ -1588,6 +1680,13 @@ let state = {
     { id:'6', col:'producao', title:'Flyer Evento Corrida', sector:'Eventos', urgent:true, priority:'alta', deadline:'2026-06-10', desc:'Flyer A4 para corrida de rua.', notes:'', files:[] },
     { id:'7', col:'aprovacao', title:'Embalagem Produto Exclusivo', sector:'Personalizados', urgent:false, priority:'media', deadline:'2026-06-30', desc:'', notes:'', files:[] },
     { id:'8', col:'finalizado', title:'Catálogo Instituto 2026', sector:'Instituto', urgent:false, priority:'baixa', deadline:'', desc:'', notes:'Aprovado pelo cliente.', files:['catalogo_2026.pdf'] },
+  ],
+  users: [
+    { id:'1', name:'Admin JBX', email:'infinitystamprp@gmail.com', role:'admin', sector:'', online:true },
+    { id:'2', name:'Sophia Bezerra', email:'sb@jbxsports.com.br', role:'viewer', sector:'Loja', online:true },
+    { id:'3', name:'Monique Camargo', email:'moniquecamargo@jbxsports.com.br', role:'viewer', sector:'Eventos', online:false },
+    { id:'4', name:'Guilherme Carvalho', email:'guilhermecarvalho@jbxsports.com.br', role:'viewer', sector:'Personalizados', online:true },
+    { id:'5', name:'Suporte', email:'suporte@jbxsports.com.br', role:'viewer', sector:'', online:false },
   ]
 };
 
@@ -1741,6 +1840,18 @@ function setupFirebase() {
     render();
   });
 
+  // Escuta mudanças em /jbxhub/users
+  const usersRef = fb.ref(fb.db, 'jbxhub/users');
+  fb.onValue(usersRef, snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      state.users = Object.values(data);
+      renderUsers();
+    } else {
+      pushUsersToFirebase();
+    }
+  });
+
   fbListenerActive = true;
 }
 
@@ -1750,6 +1861,14 @@ function pushTasksToFirebase() {
   const tasksObj = {};
   state.tasks.forEach(t => { tasksObj[t.id] = t; });
   fb.set(fb.ref(fb.db, 'jbxhub/tasks'), tasksObj).catch(console.warn);
+}
+
+function pushUsersToFirebase() {
+  const fb = window._fb;
+  if (!fb || !fb.enabled) return;
+  const usersObj = {};
+  state.users.forEach(u => { usersObj[u.id] = u; });
+  fb.set(fb.ref(fb.db, 'jbxhub/users'), usersObj).catch(console.warn);
 }
 
 function updateFirebaseUI(online) {
@@ -1778,12 +1897,13 @@ function updateFirebaseUI(online) {
 // ═══════════════════════════════════════════════════════════════
 function saveState() {
   try {
-    localStorage.setItem('jbxhub', JSON.stringify({ tasks: state.tasks }));
+    localStorage.setItem('jbxhub', JSON.stringify({ tasks: state.tasks, users: state.users }));
   } catch(e) {}
 
   // Sincroniza com Firebase se disponível
   if (window._fb && window._fb.enabled) {
     pushTasksToFirebase();
+    pushUsersToFirebase();
   }
 }
 
@@ -1793,6 +1913,7 @@ function loadState() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed.tasks) state.tasks = parsed.tasks;
+      if (parsed.users) state.users = parsed.users;
     }
   } catch(e) {}
 }
@@ -1858,8 +1979,19 @@ function render() {
   renderStats();
   renderKanban();
   renderDashboardWidgets();
+  renderUsers();
   updateCharts();
   updateNavBadge();
+  updateOnlineCounter();
+}
+
+function updateOnlineCounter() {
+  const onlineCount = state.users.filter(u => u.online).length;
+  const counter = el('online-counter');
+  if (counter) {
+    counter.textContent = `👥 ${onlineCount} online`;
+    counter.title = `${onlineCount} usuário(s) online agora`;
+  }
 }
 
 function renderStats() {
@@ -1976,6 +2108,28 @@ function renderDashboardWidgets() {
   }).join('');
 }
 
+function renderUsers() {
+  const grid = el('users-grid');
+  if (!grid) return;
+  grid.innerHTML = state.users.map(u => {
+    const colors = ['#8b5cf6','#3b82f6','#10b981','#f97316','#ef4444'];
+    const color = colors[u.name.charCodeAt(0) % colors.length];
+    return `
+      <div class="user-row">
+        <div class="user-row-avatar" style="background:linear-gradient(135deg,${color},${color}99)">${u.name[0].toUpperCase()}</div>
+        <div class="user-row-info">
+          <div class="user-row-name">${u.name}</div>
+          <div class="user-row-email">${u.email}</div>
+          <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-viewer'}">${u.role.toUpperCase()}</span>
+          ${u.sector ? `<span style="font-size:10px;color:var(--muted);margin-left:6px;">${u.sector}</span>` : ''}
+        </div>
+        <div class="online-dot ${u.online ? '' : 'offline-dot'}" title="${u.online ? 'Online' : 'Offline'}"></div>
+        ${u.id !== '1' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">✕</button>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
 function updateNavBadge() {
   el('nav-badge-total').textContent = state.tasks.length;
 }
@@ -2048,7 +2202,6 @@ function openDetail(id) {
   el('detail-title').textContent = task.title;
   el('detail-title-input').value = task.title;
   el('detail-col').value = task.col;
-  el('detail-priority').value = task.priority || 'media';
   el('detail-notes').value = task.notes || '';
 
   const tagsEl = el('detail-tags');
@@ -2066,6 +2219,7 @@ function openDetail(id) {
 function editTaskTitle() {
   const titleEl = el('detail-title');
   const inputEl = el('detail-title-input');
+  const btnEdit = document.querySelector('[onclick="editTaskTitle()"]');
   
   if (inputEl.style.display === 'none') {
     titleEl.style.display = 'none';
@@ -2147,17 +2301,6 @@ function moveTaskDetail() {
   }
 }
 
-function updateTaskPriority() {
-  const id = state.detailTaskId;
-  const task = state.tasks.find(t => t.id === id);
-  if (task) {
-    task.priority = el('detail-priority').value;
-    saveState();
-    render();
-    toast('Prioridade atualizada!', 'success');
-  }
-}
-
 function saveDetailNotes() {
   const id = state.detailTaskId;
   const task = state.tasks.find(t => t.id === id);
@@ -2232,7 +2375,6 @@ function previewFile(taskId, fileIdx) {
     </div>
   `;
   document.body.appendChild(modal);
-  modal.classList.add('open');
 }
 
 function downloadFile(taskId, fileIdx) {
@@ -2263,9 +2405,42 @@ function deleteFromDetail() {
   toast('Tarefa deletada', 'info');
 }
 
+// ── USERS ──
+function saveUser() {
+  const name  = el('user-name').value.trim();
+  const email = el('user-email').value.trim();
+  if (!name || !email) { toast('Preencha nome e email', 'error'); return; }
+  if (state.users.find(u => u.email === email)) { toast('Email já cadastrado', 'error'); return; }
+
+  state.users.push({
+    id: uid(),
+    name,
+    email,
+    role: el('user-role').value,
+    sector: el('user-sector').value,
+    online: false
+  });
+
+  closeModal('modal-user');
+  el('user-name').value = '';
+  el('user-email').value = '';
+  saveState();
+  renderUsers();
+  toast(`${name} criado!`, 'success');
+}
+
+function deleteUser(id) {
+  const u = state.users.find(x => x.id === id);
+  if (!u || !confirm(`Deletar usuário "${u.name}"?`)) return;
+  state.users = state.users.filter(x => x.id !== id);
+  saveState();
+  renderUsers();
+  toast('Usuário removido', 'info');
+}
+
 // ── SETTINGS ACTIONS ──
 function exportData() {
-  const data = JSON.stringify({ tasks: state.tasks }, null, 2);
+  const data = JSON.stringify({ tasks: state.tasks, users: state.users }, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
@@ -2277,8 +2452,9 @@ function exportData() {
 }
 
 function clearAllData() {
-  if (!confirm('Tem certeza? Isso apagará TODAS as tarefas.')) return;
+  if (!confirm('Tem certeza? Isso apagará TODAS as tarefas e usuários (exceto Admin).')) return;
   state.tasks = [];
+  state.users = state.users.filter(u => u.id === '1');
   saveState();
   render();
   toast('Dados limpos', 'info');
@@ -2364,6 +2540,7 @@ function showView(id, navEl) {
   const titles = {
     dashboard: 'Dashboard <span>Visão Geral</span>',
     kanban: 'Quadro de Tarefas',
+    users: 'Usuários',
     settings: 'Configurações'
   };
   el('topbar-title').innerHTML = titles[id] || id;
@@ -2408,6 +2585,7 @@ function openModal(id)  { el(id).classList.add('open'); }
 function closeModal(id) { el(id).classList.remove('open'); }
 function closeModalOverlay(e, id) { if (e.target.classList.contains('modal-overlay')) closeModal(id); }
 function openNewTaskModal() { openModal('modal-newtask'); }
+function openUserModal()    { openModal('modal-user'); }
 
 // ── FORM HELPERS ──
 function openForm(col) {
@@ -2442,6 +2620,14 @@ function el(id) { return document.getElementById(id); }
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function fmtDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
 
+// ── SIMULATE ONLINE STATUS ──
+function simulateActivity() {
+  state.users.forEach((u, i) => {
+    if (i > 0 && Math.random() < 0.15) { u.online = !u.online; }
+  });
+  renderUsers();
+}
+
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
@@ -2460,6 +2646,8 @@ function initApp() {
     }
   };
   tryFirebase();
+
+  setInterval(() => { simulateActivity(); }, 8000);
 
   // Close mobile menu when clicking nav items
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -2481,7 +2669,7 @@ document.addEventListener('keydown', e => {
     openNewTaskModal();
   }
   if (e.key === 'Escape') {
-    ['modal-newtask','modal-detail'].forEach(closeModal);
+    ['modal-newtask','modal-detail','modal-user'].forEach(closeModal);
   }
 });
 </script>
