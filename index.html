@@ -92,12 +92,22 @@ body {
   position: fixed;
   inset: 0;
   background: var(--bg);
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   flex-direction: column;
   gap: 0;
+}
+
+body.theme-light #login-screen {
+  background: #f5f5f5;
+}
+
+#login-screen[data-bg-type="image"] {
+  background-image: var(--login-bg-image);
 }
 #login-screen.hidden { display: none; }
 
@@ -214,6 +224,670 @@ body {
   border-radius: 4px;
   font-family: 'JetBrains Mono', monospace;
   color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════
+   TEMA CLARO/ESCURO E PERSONALIZAÇÃO
+   ══════════════════════════════════════════════════ */
+body.theme-light {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --card: #f9f9f9;
+  --card2: #f0f0f0;
+  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --muted: #666666;
+  --muted2: #444444;
+}
+
+body.theme-light .login-card {
+  background: #ffffff;
+  border-color: #e0e0e0;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.1);
+}
+
+body.theme-light .login-field input {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #1a1a1a;
+}
+
+body.theme-light .login-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
+}
+
+body.theme-light .sidebar {
+  background: #ffffff;
+  border-right-color: #e0e0e0;
+}
+
+body.theme-light .nav-item {
+  color: #666666;
+}
+
+body.theme-light .nav-item:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+body.theme-light .topbar {
+  background: #ffffff;
+  border-bottom-color: #e0e0e0;
+}
+
+body.theme-light .modal {
+  background: #ffffff;
+  border-color: #e0e0e0;
+}
+
+body.theme-light .modal input,
+body.theme-light .modal select,
+body.theme-light .modal textarea {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #1a1a1a;
+}
+
+/* Fundo personalizado */
+body[data-bg-type="image"] {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+body[data-bg-type="color"] {
+  background-color: var(--custom-bg-color, var(--bg));
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(249,115,22,0.1);
+  border: 1px solid rgba(249,115,22,0.3);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.theme-toggle:hover {
+  background: rgba(249,115,22,0.2);
+  border-color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════
+   MÓDULO DE DESIGNERS E SOCIAL MEDIA
+   ══════════════════════════════════════════════════ */
+
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.designer-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.designer-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.1);
+}
+
+.designer-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.designer-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(249,115,22,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.designer-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.designer-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.designer-card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.designer-badge {
+  background: rgba(249,115,22,0.1);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* Calendário Editorial */
+.calendar-wrapper {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calendar-day:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.calendar-day.has-event {
+  background: rgba(249,115,22,0.15);
+  border-color: var(--accent);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Biblioteca de Marcas */
+.brand-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.brand-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.brand-item:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(249,115,22,0.1);
+}
+
+.brand-logo {
+  width: 100%;
+  height: 80px;
+  background: var(--card2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.brand-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Histórico de Versões */
+.version-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.version-item {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.version-item::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+.version-item::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 28px;
+  width: 2px;
+  height: calc(100% + 16px);
+  background: var(--border);
+}
+
+.version-item:last-child::after {
+  display: none;
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.version-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.version-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.version-desc {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.4;
+}
+
+/* Área de Aprovações */
+.approval-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-status.pending {
+  background: rgba(251,191,36,0.15);
+  color: var(--yellow);
+}
+
+.approval-status.approved {
+  background: rgba(16,185,129,0.15);
+  color: var(--green);
+}
+
+.approval-status.rejected {
+  background: rgba(239,68,68,0.15);
+  color: var(--red);
+}
+
+/* Checklist de Publicação */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--card2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.checklist-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.checklist-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.checklist-item input[type="checkbox"]:checked + label {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* ══════════════════════════════════════════════════
+   MÓDULO DE DESIGNERS E SOCIAL MEDIA
+   ══════════════════════════════════════════════════ */
+
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.designer-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.designer-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.1);
+}
+
+.designer-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.designer-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(249,115,22,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.designer-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.designer-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.designer-card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.designer-badge {
+  background: rgba(249,115,22,0.1);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* Calendário Editorial */
+.calendar-wrapper {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calendar-day:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.calendar-day.has-event {
+  background: rgba(249,115,22,0.15);
+  border-color: var(--accent);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Biblioteca de Marcas */
+.brand-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.brand-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.brand-item:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(249,115,22,0.1);
+}
+
+.brand-logo {
+  width: 100%;
+  height: 80px;
+  background: var(--card2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.brand-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Histórico de Versões */
+.version-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.version-item {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.version-item::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+.version-item::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 28px;
+  width: 2px;
+  height: calc(100% + 16px);
+  background: var(--border);
+}
+
+.version-item:last-child::after {
+  display: none;
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.version-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.version-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.version-desc {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.4;
+}
+
+/* Área de Aprovações */
+.approval-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-status.pending {
+  background: rgba(251,191,36,0.15);
+  color: var(--yellow);
+}
+
+.approval-status.approved {
+  background: rgba(16,185,129,0.15);
+  color: var(--green);
+}
+
+.approval-status.rejected {
+  background: rgba(239,68,68,0.15);
+  color: var(--red);
+}
+
+/* Checklist de Publicação */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--card2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.checklist-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.checklist-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.checklist-item input[type="checkbox"]:checked + label {
+  color: var(--muted);
+  text-decoration: line-through;
 }
 
 /* ── SIDEBAR ── */
@@ -1014,6 +1688,198 @@ body {
 .settings-input:focus { border-color: var(--accent); }
 
 /* ══════════════════════════════════════════════════
+   CONFIGURAÇÕES DE TEMA E PERSONALIZAÇÃO
+   ══════════════════════════════════════════════════ */
+
+.theme-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--card2);
+}
+
+.theme-option:hover {
+  border-color: var(--accent);
+}
+
+.theme-option.active {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.1);
+}
+
+.theme-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.theme-preview.dark {
+  background: linear-gradient(135deg, #0b0e17 0%, #1c2235 100%);
+}
+
+.theme-preview.light {
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+}
+
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 10px;
+}
+
+.color-option {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  border-color: var(--text);
+}
+
+.color-option.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
+}
+
+.bg-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bg-upload-area:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.bg-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+/* ══════════════════════════════════════════════════
+   CONFIGURAÇÕES DE TEMA E PERSONALIZAÇÃO
+   ══════════════════════════════════════════════════ */
+
+.theme-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--card2);
+}
+
+.theme-option:hover {
+  border-color: var(--accent);
+}
+
+.theme-option.active {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.1);
+}
+
+.theme-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.theme-preview.dark {
+  background: linear-gradient(135deg, #0b0e17 0%, #1c2235 100%);
+}
+
+.theme-preview.light {
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+}
+
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 10px;
+}
+
+.color-option {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  border-color: var(--text);
+}
+
+.color-option.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
+}
+
+.bg-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bg-upload-area:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.bg-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+/* ══════════════════════════════════════════════════
    MOBILE RESPONSIVENESS
    ══════════════════════════════════════════════════ */
 .mobile-menu-toggle {
@@ -1126,9 +1992,7 @@ body {
 
     <button class="login-btn" onclick="doLogin()">Entrar no Sistema</button>
 
-    <div class="login-hint">
-      Senha padrão: <code>jbx2024</code> — altere em Configurações
-    </div>
+
   </div>
 </div>
 
@@ -1158,10 +2022,15 @@ body {
       <span class="nav-label">Quadro de Tarefas</span>
       <span class="nav-badge" id="nav-badge-total">0</span>
     </div>
-    <div class="nav-item" onclick="showView('users', this)">
-      <span class="nav-icon">👥</span>
-      <span class="nav-label">Usuários</span>
-    </div>
+      <div class="nav-item" onclick="showView('designers', this)">
+        <div class="nav-icon">🎨</div>
+        <div class="nav-label">Designers</div>
+        <div class="nav-badge" style="background:var(--purple)">NOVO</div>
+      </div>
+      <div class="nav-item" onclick="showView('users', this)">
+        <div class="nav-icon">👥</div>
+        <div class="nav-label">Usuários</div>
+      </div>
     <div class="nav-item" onclick="showView('settings', this)">
       <span class="nav-icon">⚙️</span>
       <span class="nav-label">Configurações</span>
@@ -1449,6 +2318,94 @@ body {
       </div>
     </div>
 
+    <!-- ═══════════ DESIGNERS VIEW ═══════════ -->
+    <div class="view" id="view-designers">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="font-size:15px;font-weight:700;">🎨 Recursos para Designers & Social Media</h2>
+      </div>
+      
+      <div class="designer-grid">
+        <!-- Biblioteca de Marcas -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">📁</div>
+            <div class="designer-card-title">Biblioteca de Marcas</div>
+          </div>
+          <div class="designer-card-desc">Identidades visuais, logos e paletas de cores organizadas por cliente.</div>
+          <div class="brand-library">
+            <div class="brand-item">
+              <div class="brand-logo">JBX</div>
+              <div class="brand-name">JBX Sports</div>
+            </div>
+            <div class="brand-item">
+              <div class="brand-logo">🛒</div>
+              <div class="brand-name">Marketplace</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendário Editorial -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">📅</div>
+            <div class="designer-card-title">Calendário Editorial</div>
+          </div>
+          <div class="designer-card-desc">Planejamento de postagens e campanhas de social media.</div>
+          <div class="calendar-wrapper">
+            <div class="calendar-grid">
+              <div class="calendar-day">1</div><div class="calendar-day has-event">2</div><div class="calendar-day">3</div>
+              <div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div><div class="calendar-day">7</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Central de Briefings -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">📝</div>
+            <div class="designer-card-title">Central de Briefings</div>
+          </div>
+          <div class="designer-card-desc">Formulários e solicitações detalhadas para novos projetos.</div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px;">📄 Ver Briefings Ativos</button>
+        </div>
+
+        <!-- Aprovações -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">⚖️</div>
+            <div class="designer-card-title">Área de Aprovações</div>
+          </div>
+          <div class="designer-card-desc">Controle de qualidade e aprovação final de artes e campanhas.</div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <span class="approval-status pending">⏳ 3 Pendentes</span>
+            <span class="approval-status approved">✅ 12 Aprovadas</span>
+          </div>
+        </div>
+
+        <!-- IA Prompts -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">🤖</div>
+            <div class="designer-card-title">Prompts de IA</div>
+          </div>
+          <div class="designer-card-desc">Biblioteca de prompts reutilizáveis para geração de imagens e textos.</div>
+          <div class="designer-card-meta">
+            <span class="designer-badge">Midjourney</span>
+            <span class="designer-badge">ChatGPT</span>
+          </div>
+        </div>
+
+        <!-- Referências -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">💡</div>
+            <div class="designer-card-title">Referências & Inspirações</div>
+          </div>
+          <div class="designer-card-desc">Moodboards e links de referências visuais para novos projetos.</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════════ USERS VIEW ═══════════ -->
     <div class="view" id="view-users">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -1513,6 +2470,44 @@ body {
               4. Em "Configurações do projeto → Seus apps", copie as credenciais<br>
               5. Cole no bloco <code style="background:var(--card2);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;color:var(--accent);">FIREBASE_CONFIG</code> no início do arquivo HTML
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aparência -->
+      <div class="settings-section">
+        <h3>🎨 Aparência e Personalização</h3>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Tema do Sistema</div>
+            <div class="settings-row-desc">Escolha entre o modo claro ou escuro.</div>
+          </div>
+          <div class="theme-selector">
+            <div class="theme-option" data-theme="dark" onclick="toggleTheme('dark')">
+              <div class="theme-preview dark"></div>
+              <span style="font-size:11px;font-weight:700;">Escuro</span>
+            </div>
+            <div class="theme-option" data-theme="light" onclick="toggleTheme('light')">
+              <div class="theme-preview light"></div>
+              <span style="font-size:11px;font-weight:700;">Claro</span>
+            </div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Fundo do Dashboard</div>
+            <div class="settings-row-desc">Personalize o fundo com uma cor ou imagem.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
+            <div class="color-picker-grid">
+              <div class="color-option" style="background:#0b0e17" onclick="setBgColor('#0b0e17')"></div>
+              <div class="color-option" style="background:#1a1c2c" onclick="setBgColor('#1a1c2c')"></div>
+              <div class="color-option" style="background:#2d1b33" onclick="setBgColor('#2d1b33')"></div>
+              <div class="color-option" style="background:#1b2d2d" onclick="setBgColor('#1b2d2d')"></div>
+              <div class="color-option" style="background:#f5f5f5" onclick="setBgColor('#f5f5f5')"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="el('bg-upload-input').click()">🖼️ Upload de Imagem</button>
+            <input type="file" id="bg-upload-input" style="display:none;" accept="image/*" onchange="handleBgUpload(this)">
           </div>
         </div>
       </div>
@@ -2540,6 +3535,7 @@ function showView(id, navEl) {
   const titles = {
     dashboard: 'Dashboard <span>Visão Geral</span>',
     kanban: 'Quadro de Tarefas',
+    designers: 'Recursos para Designers',
     users: 'Usuários',
     settings: 'Configurações'
   };
@@ -2634,6 +3630,7 @@ function simulateActivity() {
 function initApp() {
   loadState();
   loadLogo();
+  loadThemeSettings();
   initCharts();
   render();
 
@@ -2653,6 +3650,67 @@ function initApp() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', closeMobileMenu);
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEMA E PERSONALIZAÇÃO
+// ═══════════════════════════════════════════════════════════════
+function toggleTheme(theme) {
+  state.theme = theme;
+  document.body.className = theme === 'light' ? 'theme-light' : '';
+  localStorage.setItem('jbxhub_theme', theme);
+  
+  // Atualiza botões no settings
+  document.querySelectorAll('.theme-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.theme === theme);
+  });
+  
+  toast(`Tema ${theme === 'light' ? 'Claro' : 'Escuro'} ativado`, 'info');
+}
+
+function loadThemeSettings() {
+  const savedTheme = localStorage.getItem('jbxhub_theme') || 'dark';
+  toggleTheme(savedTheme);
+  
+  const savedBgType = localStorage.getItem('jbxhub_bg_type') || 'color';
+  const savedBgColor = localStorage.getItem('jbxhub_bg_color') || '#0b0e17';
+  const savedBgImage = localStorage.getItem('jbxhub_bg_image') || '';
+  
+  applyBackground(savedBgType, savedBgType === 'color' ? savedBgColor : savedBgImage);
+}
+
+function applyBackground(type, value) {
+  state.bgType = type;
+  document.body.dataset.bgType = type;
+  
+  if (type === 'color') {
+    state.bgColor = value;
+    document.body.style.backgroundColor = value;
+    document.body.style.backgroundImage = 'none';
+    localStorage.setItem('jbxhub_bg_color', value);
+  } else {
+    state.bgImage = value;
+    document.body.style.backgroundImage = `url(${value})`;
+    localStorage.setItem('jbxhub_bg_image', value);
+  }
+  
+  localStorage.setItem('jbxhub_bg_type', type);
+}
+
+function handleBgUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    applyBackground('image', ev.target.result);
+    toast('Imagem de fundo atualizada!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function setBgColor(color) {
+  applyBackground('color', color);
+  toast('Cor de fundo atualizada!', 'success');
 }
 
 // Carrega logo na tela de login antes do app iniciar
