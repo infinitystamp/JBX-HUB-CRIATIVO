@@ -2511,8 +2511,9 @@ body[data-bg-type="color"] {
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <select id="settings-gemini-model" onchange="state.aiConfig.gemini.model=this.value;saveState();" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px;">
-              <option value="gemini-pro">Gemini Pro</option>
-              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Recomendado)</option>
+              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
             </select>
             <input type="password" class="settings-input" id="settings-gemini-key" placeholder="AIza..." style="min-width:150px;">
             <button class="btn btn-primary btn-sm" onclick="saveAIKey('gemini')">Salvar</button>
@@ -2815,6 +2816,56 @@ body[data-bg-type="color"] {
   </div>
 </div>
 
+<!-- ═══════════ MODAL: BRIEFING ═══════════ -->
+<div class="modal-overlay" id="modal-briefing" onclick="closeModalOverlay(event,'modal-briefing')">
+  <div class="modal" style="width:520px;">
+    <button class="modal-close-x" onclick="closeModal('modal-briefing')">✕</button>
+    <h2 id="briefing-modal-title">📝 Novo Briefing</h2>
+    
+    <input type="hidden" id="briefing-id">
+    
+    <label>Título do Briefing *</label>
+    <input type="text" id="briefing-title" placeholder="Ex: Identidade Visual Verão">
+    
+    <label>Departamento / Solicitante *</label>
+    <select id="briefing-department">
+      <option value="Marketing">Marketing</option>
+      <option value="Comercial">Comercial</option>
+      <option value="Eventos">Eventos</option>
+      <option value="Produtos">Produtos</option>
+      <option value="Social Media">Social Media</option>
+      <option value="Outro">Outro</option>
+    </select>
+    
+    <label>Descrição / Detalhes *</label>
+    <textarea id="briefing-desc" placeholder="Descreva o que precisa ser feito..." rows="4"></textarea>
+    
+    <label>Prazo</label>
+    <input type="date" id="briefing-deadline">
+    
+    <label>Prioridade</label>
+    <select id="briefing-priority">
+      <option value="media">🟡 Média</option>
+      <option value="alta">🔴 Alta</option>
+      <option value="baixa">🟢 Baixa</option>
+    </select>
+    
+    <label>Status</label>
+    <select id="briefing-status">
+      <option value="aberto">Aberto</option>
+      <option value="em-producao">Em Produção</option>
+      <option value="concluido">Concluído</option>
+    </select>
+    
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-danger btn-sm" id="btn-delete-briefing" onclick="deleteBriefing()" style="display:none;">Excluir</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" onclick="closeModal('modal-briefing')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveBriefing()">Salvar Briefing</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toasts"></div>
 
@@ -2845,10 +2896,11 @@ let state = {
     { id: 'e1', title: 'Lançamento Coleção Inverno', date: '2026-06-16', banner: '', desc: 'Postagem principal social media' },
     { id: 'e2', title: 'Flash Sale Marketplace', date: '2026-06-22', banner: '', desc: 'Campanha de 24h' }
   ],
+  briefings: [],
   aiConfig: {
     activeProvider: 'openai',
     openai: { key: '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', enabled: true, model: 'gpt-3.5-turbo' },
-    gemini: { key: '', enabled: false, model: 'gemini-pro' },
+    gemini: { key: '', enabled: false, model: 'gemini-1.5-flash' },
     nanobanana: { key: '', enabled: false, model: 'nano-1' }
   },
   tasks: [
@@ -3077,7 +3129,7 @@ function updateFirebaseUI(online) {
 // ═══════════════════════════════════════════════════════════════
 function saveState() {
   try {
-    localStorage.setItem('jbxhub', JSON.stringify({ tasks: state.tasks, users: state.users }));
+    localStorage.setItem('jbxhub', JSON.stringify({ tasks: state.tasks, users: state.users, calendarEvents: state.calendarEvents, briefings: state.briefings }));
   } catch(e) {}
 
   // Sincroniza com Firebase se disponível
@@ -3094,6 +3146,8 @@ function loadState() {
       const parsed = JSON.parse(saved);
       if (parsed.tasks) state.tasks = parsed.tasks;
       if (parsed.users) state.users = parsed.users;
+      if (parsed.calendarEvents) state.calendarEvents = parsed.calendarEvents;
+      if (parsed.briefings) state.briefings = parsed.briefings;
     }
   } catch(e) {}
 }
@@ -3428,22 +3482,11 @@ const DESIGNER_RESOURCES = {
   briefings: {
     title: '📝 Central de Briefings',
     content: `
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="padding:15px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <div style="font-weight:700;">Briefing: Identidade Visual</div>
-            <div style="font-size:12px;color:var(--muted);">Enviado por: Marketing · Há 2 horas</div>
-          </div>
-          <button class="btn btn-primary btn-sm">Abrir</button>
+      <div style="display:flex;flex-direction:column;gap:15px;">
+        <button class="btn btn-primary" onclick="openBriefingModal()" style="width:100%;">+ Novo Briefing</button>
+        <div id="briefings-list" style="display:flex;flex-direction:column;gap:10px;">
+          <div style="text-align:center;color:var(--muted);padding:30px;background:var(--card2);border-radius:10px;font-size:12px;">Nenhum briefing criado ainda. Clique em Novo Briefing para começar.</div>
         </div>
-        <div style="padding:15px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <div style="font-weight:700;">Briefing: Campanha Julho</div>
-            <div style="font-size:12px;color:var(--muted);">Enviado por: Comercial · Ontem</div>
-          </div>
-          <button class="btn btn-primary btn-sm">Abrir</button>
-        </div>
-        <button class="btn btn-ghost" style="border:2px dashed var(--border);padding:15px;">➕ Criar Novo Formulário de Briefing</button>
       </div>
     `
   },
@@ -3475,6 +3518,7 @@ const DESIGNER_RESOURCES = {
 };
 
 function openDesignerResource(type) {
+  if (type === 'briefings') renderBriefingsList();
   const resource = DESIGNER_RESOURCES[type];
   if (!resource) return;
   
@@ -3627,6 +3671,105 @@ function deleteEvent() {
   toast('Evento excluído', 'info');
 }
 
+// ── BRIEFINGS MANAGEMENT ──
+function openBriefingModal(briefingId = null) {
+  const modal = el('modal-briefing');
+  const title = el('briefing-modal-title');
+  const btnDel = el('btn-delete-briefing');
+  
+  el('briefing-id').value = '';
+  el('briefing-title').value = '';
+  el('briefing-department').value = 'Marketing';
+  el('briefing-desc').value = '';
+  el('briefing-deadline').value = '';
+  el('briefing-priority').value = 'media';
+  el('briefing-status').value = 'aberto';
+  btnDel.style.display = 'none';
+  
+  if (briefingId) {
+    const b = state.briefings.find(x => x.id === briefingId);
+    if (b) {
+      el('briefing-id').value = b.id;
+      el('briefing-title').value = b.title;
+      el('briefing-department').value = b.department;
+      el('briefing-desc').value = b.desc;
+      el('briefing-deadline').value = b.deadline || '';
+      el('briefing-priority').value = b.priority;
+      el('briefing-status').value = b.status;
+      title.textContent = '✏️ Editar Briefing';
+      btnDel.style.display = 'block';
+    }
+  } else {
+    title.textContent = '📝 Novo Briefing';
+  }
+  
+  openModal('modal-briefing');
+}
+
+function saveBriefing() {
+  const id = el('briefing-id').value;
+  const title = el('briefing-title').value.trim();
+  const department = el('briefing-department').value;
+  const desc = el('briefing-desc').value.trim();
+  
+  if (!title || !desc) { toast('Título e descrição são obrigatórios', 'error'); return; }
+  
+  const briefingData = {
+    id: id || uid(),
+    title,
+    department,
+    desc,
+    deadline: el('briefing-deadline').value,
+    priority: el('briefing-priority').value,
+    status: el('briefing-status').value,
+    createdAt: id ? undefined : new Date().toISOString()
+  };
+  
+  if (id) {
+    const idx = state.briefings.findIndex(b => b.id === id);
+    state.briefings[idx] = briefingData;
+  } else {
+    state.briefings.push(briefingData);
+  }
+  
+  saveState();
+  closeModal('modal-briefing');
+  renderBriefingsList();
+  toast('Briefing salvo!', 'success');
+}
+
+function deleteBriefing() {
+  const id = el('briefing-id').value;
+  if (!id || !confirm('Excluir este briefing?')) return;
+  
+  state.briefings = state.briefings.filter(b => b.id !== id);
+  saveState();
+  closeModal('modal-briefing');
+  renderBriefingsList();
+  toast('Briefing excluído', 'info');
+}
+
+function renderBriefingsList() {
+  const container = el('briefings-list');
+  if (!container) return;
+  
+  if (state.briefings.length === 0) {
+    container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;background:var(--card2);border-radius:10px;font-size:12px;">Nenhum briefing criado ainda. Clique em Novo Briefing para começar.</div>`;
+  } else {
+    container.innerHTML = state.briefings.map(b => `
+      <div style="padding:15px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:13px;">${b.title}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">📤 ${b.department} · ${b.priority === 'alta' ? '🔴 Alta' : b.priority === 'media' ? '🟡 Média' : '🟢 Baixa'} · ${b.status === 'aberto' ? '🔵 Aberto' : b.status === 'em-producao' ? '🟠 Em Produção' : '✅ Concluído'}</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:6px;line-height:1.4;">${b.desc.substring(0, 80)}${b.desc.length > 80 ? '...' : ''}</div>
+          ${b.deadline ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;">📅 Prazo: ${fmtDate(b.deadline)}</div>` : ''}
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="openBriefingModal('${b.id}')">✏️</button>
+      </div>
+    `).join('');
+  }
+}
+
 function renderDashboardCalendar() {
   const container = el('dashboard-calendar-mini');
   if (!container) return;
@@ -3745,7 +3888,7 @@ async function sendIAChat() {
       if (data.error) throw new Error(data.error.message);
       reply = data.choices[0].message.content;
     } else if (provider === 'gemini') {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${config.key}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: message }] }] })
