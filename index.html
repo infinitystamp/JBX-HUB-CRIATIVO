@@ -9,7 +9,52 @@
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
+<!-- ══════════════════════════════════════════════════
+     FIREBASE SDK  (Realtime Database)
+     Substitua as variáveis abaixo com as do seu projeto
+     Firebase Console → Configurações do projeto → Seus apps
+     ══════════════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, set, onValue, push, remove, update }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  // ─────────────────────────────────────────────────
+  // ⚙️  CONFIGURAÇÃO DO FIREBASE — edite aqui
+  // ─────────────────────────────────────────────────
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyA5zurcZ2nXayHY9fDerg2lm8tWtIWvepo",
+    authDomain:        "jbx-hub-76cb2.firebaseapp.com",
+    databaseURL:       "https://jbx-hub-76cb2-default-rtdb.firebaseio.com",
+    projectId:         "jbx-hub-76cb2",
+    storageBucket:     "jbx-hub-76cb2.firebasestorage.app",
+    messagingSenderId: "346722135646",
+    appId:             "1:346722135646:web:23dfcb89b887fadba8cecf"
+  };
+  // ─────────────────────────────────────────────────
+
+  const FIREBASE_ENABLED = FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.length > 0 && FIREBASE_CONFIG.databaseURL && FIREBASE_CONFIG.databaseURL.includes('firebaseio.com');
+
+  if (FIREBASE_ENABLED) {
+    try {
+      const app = initializeApp(FIREBASE_CONFIG);
+      const db  = getDatabase(app);
+
+      // Expõe para o script principal
+      window._fb = { db, ref, set, onValue, push, remove, update, enabled: true };
+    } catch(e) {
+      console.warn("Firebase init error:", e);
+      window._fb = { enabled: false };
+    }
+  } else {
+    window._fb = { enabled: false };
+  }
+</script>
+
 <style>
+/* ══════════════════════════════════════════════════
+   DESIGN TOKENS
+   ══════════════════════════════════════════════════ */
 :root {
   --bg:      #0b0e17;
   --surface: #111420;
@@ -28,17 +73,6 @@
   --muted2:  #8899bb;
 }
 
-body.light-mode {
-  --bg:      #f5f5f5;
-  --surface: #ffffff;
-  --card:    #fafafa;
-  --card2:   #f0f0f0;
-  --border:  #e0e0e0;
-  --text:    #1a1a1a;
-  --muted:   #666666;
-  --muted2:  #444444;
-}
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -49,18 +83,31 @@ body {
   height: 100vh;
   overflow: hidden;
   font-size: 14px;
-  transition: background 0.3s, color 0.3s;
 }
 
+/* ══════════════════════════════════════════════════
+   TELA DE LOGIN
+   ══════════════════════════════════════════════════ */
 #login-screen {
   position: fixed;
   inset: 0;
   background: var(--bg);
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   flex-direction: column;
+  gap: 0;
+}
+
+body.theme-light #login-screen {
+  background: #f5f5f5;
+}
+
+#login-screen[data-bg-type="image"] {
+  background-image: var(--login-bg-image);
 }
 #login-screen.hidden { display: none; }
 
@@ -98,6 +145,7 @@ body {
   color: white;
   overflow: hidden;
 }
+.login-logo-mark img { width:100%; height:100%; object-fit:contain; border-radius:10px; }
 .login-logo-text { font-size: 22px; font-weight: 700; }
 .login-logo-text span { color: var(--accent); }
 
@@ -137,6 +185,16 @@ body {
   box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
 }
 
+.login-error {
+  font-size: 12px;
+  color: var(--red);
+  margin-bottom: 12px;
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .login-btn {
   width: 100%;
   background: var(--accent);
@@ -154,6 +212,685 @@ body {
 .login-btn:hover { background: var(--accent2); }
 .login-btn:active { transform: scale(0.98); }
 
+.login-hint {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 16px;
+}
+.login-hint code {
+  background: var(--card2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════
+   TEMA CLARO/ESCURO E PERSONALIZAÇÃO
+   ══════════════════════════════════════════════════ */
+body.theme-light {
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --card: #f9f9f9;
+  --card2: #f0f0f0;
+  --border: #e0e0e0;
+  --text: #1a1a1a;
+  --muted: #666666;
+  --muted2: #444444;
+}
+
+body.theme-light .login-card {
+  background: #ffffff;
+  border-color: #e0e0e0;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.1);
+}
+
+body.theme-light .login-field input {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #1a1a1a;
+}
+
+body.theme-light .login-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
+}
+
+body.theme-light .sidebar {
+  background: #ffffff;
+  border-right-color: #e0e0e0;
+}
+
+body.theme-light .nav-item {
+  color: #666666;
+}
+
+body.theme-light .nav-item:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+body.theme-light .topbar {
+  background: #ffffff;
+  border-bottom-color: #e0e0e0;
+}
+
+body.theme-light .modal {
+  background: #ffffff;
+  border-color: #e0e0e0;
+}
+
+body.theme-light .modal input,
+body.theme-light .modal select,
+body.theme-light .modal textarea {
+  background: #f5f5f5;
+  border-color: #e0e0e0;
+  color: #1a1a1a;
+}
+
+/* Fundo personalizado */
+body[data-bg-type="image"] {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+body[data-bg-type="color"] {
+  background-color: var(--custom-bg-color, var(--bg));
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(249,115,22,0.1);
+  border: 1px solid rgba(249,115,22,0.3);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.theme-toggle:hover {
+  background: rgba(249,115,22,0.2);
+  border-color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════
+   MÓDULO DE DESIGNERS E SOCIAL MEDIA
+   ══════════════════════════════════════════════════ */
+
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.designer-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.designer-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.1);
+}
+
+.designer-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.designer-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(249,115,22,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.designer-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.designer-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.designer-card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.designer-badge {
+  background: rgba(249,115,22,0.1);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* Calendário Editorial */
+.calendar-wrapper {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calendar-day:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.calendar-day.has-event {
+  background: rgba(249,115,22,0.15);
+  border-color: var(--accent);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Biblioteca de Marcas */
+.brand-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.brand-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.brand-item:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(249,115,22,0.1);
+}
+
+.brand-logo {
+  width: 100%;
+  height: 80px;
+  background: var(--card2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.brand-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Histórico de Versões */
+.version-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.version-item {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.version-item::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+.version-item::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 28px;
+  width: 2px;
+  height: calc(100% + 16px);
+  background: var(--border);
+}
+
+.version-item:last-child::after {
+  display: none;
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.version-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.version-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.version-desc {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.4;
+}
+
+/* Área de Aprovações */
+.approval-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-status.pending {
+  background: rgba(251,191,36,0.15);
+  color: var(--yellow);
+}
+
+.approval-status.approved {
+  background: rgba(16,185,129,0.15);
+  color: var(--green);
+}
+
+.approval-status.rejected {
+  background: rgba(239,68,68,0.15);
+  color: var(--red);
+}
+
+/* Checklist de Publicação */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--card2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.checklist-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.checklist-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.checklist-item input[type="checkbox"]:checked + label {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* ══════════════════════════════════════════════════
+   MÓDULO DE DESIGNERS E SOCIAL MEDIA
+   ══════════════════════════════════════════════════ */
+
+.designer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.designer-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.designer-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(249,115,22,0.1);
+}
+
+.designer-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.designer-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(249,115,22,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.designer-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.designer-card-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.designer-card-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.designer-badge {
+  background: rgba(249,115,22,0.1);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* Calendário Editorial */
+.calendar-wrapper {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calendar-day:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.calendar-day.has-event {
+  background: rgba(249,115,22,0.15);
+  border-color: var(--accent);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Biblioteca de Marcas */
+.brand-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.brand-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.brand-item:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(249,115,22,0.1);
+}
+
+.brand-logo {
+  width: 100%;
+  height: 80px;
+  background: var(--card2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.brand-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Histórico de Versões */
+.version-timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.version-item {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.version-item::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+}
+
+.version-item::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 28px;
+  width: 2px;
+  height: calc(100% + 16px);
+  background: var(--border);
+}
+
+.version-item:last-child::after {
+  display: none;
+}
+
+.version-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.version-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.version-date {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.version-desc {
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.4;
+}
+
+/* Área de Aprovações */
+.approval-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.approval-status.pending {
+  background: rgba(251,191,36,0.15);
+  color: var(--yellow);
+}
+
+.approval-status.approved {
+  background: rgba(16,185,129,0.15);
+  color: var(--green);
+}
+
+.approval-status.rejected {
+  background: rgba(239,68,68,0.15);
+  color: var(--red);
+}
+
+/* Checklist de Publicação */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--card2);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.checklist-item input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.checklist-item label {
+  flex: 1;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.checklist-item input[type="checkbox"]:checked + label {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* ── SIDEBAR ── */
 .sidebar {
   width: 240px;
   min-width: 240px;
@@ -165,6 +902,7 @@ body {
   transition: width 0.3s ease;
   z-index: 20;
 }
+.sidebar.collapsed { width: 60px; min-width: 60px; }
 
 .sidebar-logo {
   padding: 18px 16px;
@@ -190,16 +928,35 @@ body {
   letter-spacing: -1px;
   overflow: hidden;
   cursor: pointer;
+  title: "Clique para trocar o logo";
   position: relative;
 }
-.logo-mark:hover { opacity: 0.8; }
+.logo-mark img { width:100%; height:100%; object-fit:contain; border-radius:6px; }
+.logo-mark-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.logo-mark:hover .logo-mark-overlay { opacity: 1; }
 
 .logo-text {
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s;
 }
 .logo-text span { color: var(--accent); }
+.sidebar.collapsed .logo-text { opacity: 0; width: 0; }
 
 .sidebar-nav {
   flex: 1;
@@ -217,7 +974,12 @@ body {
   color: var(--muted);
   text-transform: uppercase;
   padding: 8px 8px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s;
 }
+.sidebar.collapsed .nav-section-label { opacity: 0; }
 
 .nav-item {
   display: flex;
@@ -230,6 +992,8 @@ body {
   color: var(--muted2);
   font-size: 13px;
   font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
   border: 1px solid transparent;
 }
 .nav-item:hover { background: var(--card2); color: var(--text); }
@@ -239,33 +1003,76 @@ body {
   border-color: rgba(249,115,22,0.25);
   font-weight: 700;
 }
+.nav-icon {
+  min-width: 20px;
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+.nav-label { overflow: hidden; transition: opacity 0.2s; opacity: 1; }
+.sidebar.collapsed .nav-label { opacity: 0; width: 0; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  transition: opacity 0.2s;
+}
+.sidebar.collapsed .nav-badge { opacity: 0; }
 
 .sidebar-footer {
   padding: 12px;
   border-top: 1px solid var(--border);
 }
-
-.theme-toggle {
-  width: 100%;
+.user-card {
   display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-.theme-btn {
-  flex: 1;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
   background: var(--card2);
+  cursor: pointer;
+  transition: background 0.15s;
+  overflow: hidden;
+}
+.user-card:hover { background: var(--card); }
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+}
+.user-info { overflow: hidden; }
+.user-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 10px; color: var(--accent); white-space: nowrap; font-family: 'JetBrains Mono', monospace; }
+
+.collapse-btn {
+  width: 100%;
+  background: transparent;
   border: 1px solid var(--border);
   color: var(--muted);
-  padding: 6px;
+  padding: 7px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
   transition: all 0.15s;
 }
-.theme-btn:hover { background: var(--card); color: var(--text); }
-.theme-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.collapse-btn:hover { background: var(--card2); color: var(--text); }
 
+/* ── LOGOUT BTN ── */
 .logout-btn {
   width: 100%;
   background: transparent;
@@ -278,9 +1085,15 @@ body {
   font-family: 'Ubuntu', sans-serif;
   margin-top: 6px;
   transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 .logout-btn:hover { background: rgba(239,68,68,0.1); }
+.sidebar.collapsed .logout-btn span.logout-label { display: none; }
 
+/* ── MAIN ── */
 .main {
   flex: 1;
   display: flex;
@@ -289,6 +1102,7 @@ body {
   min-width: 0;
 }
 
+/* ── TOPBAR ── */
 .topbar {
   height: 60px;
   min-height: 60px;
@@ -305,6 +1119,9 @@ body {
   color: var(--text);
   flex: 1;
 }
+.topbar-title span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
 
 .btn {
   display: inline-flex;
@@ -318,11 +1135,28 @@ body {
   transition: all 0.15s;
   border: none;
   font-family: 'Ubuntu', sans-serif;
+  white-space: nowrap;
 }
 .btn-primary { background: var(--accent); color: white; }
 .btn-primary:hover { background: var(--accent2); }
+.btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--card2); color: var(--text); }
+.btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.btn-danger:hover { background: rgba(239,68,68,0.25); }
 .btn-sm { padding: 4px 10px; font-size: 11px; }
 
+/* ── LIVE INDICATOR ── */
+.live-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  margin-right: 4px;
+}
+.live-dot.offline { background: var(--muted); animation: none; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+/* ── CONTENT AREA ── */
 .content {
   flex: 1;
   overflow-y: auto;
@@ -333,10 +1167,80 @@ body {
   gap: 24px;
 }
 
-.view-section { display: none; }
-.view-section.active { display: block; }
+/* VIEWS */
+.view { display: none; flex-direction: column; gap: 24px; }
+.view.active { display: flex; }
 
-/* KANBAN */
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--muted); }
+.stat-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.stat-info {}
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.1; font-family: 'JetBrains Mono', monospace; }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── CHARTS ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 14px;
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.chart-card h3 { font-size: 13px; color: var(--muted2); font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+.chart-wrap { position: relative; }
+
+/* ── KANBAN ── */
+.kanban-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.kanban-header h2 { font-size: 15px; font-weight: 700; }
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.15s;
+  font-family: 'Ubuntu', sans-serif;
+}
+.filter-tab:hover { border-color: var(--accent); color: var(--accent); }
+.filter-tab.active { background: rgba(249,115,22,0.15); border-color: var(--accent); color: var(--accent); }
+
 .board {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -348,588 +1252,1464 @@ body {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 16px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
+  gap: 10px;
 }
-
 .col-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
 }
-.col-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.col-count { font-size: 11px; color: var(--muted); background: var(--card2); padding: 2px 8px; border-radius: 10px; }
+.col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted2); flex: 1; }
+.col-count {
+  background: var(--card2);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
 
-.task {
+.tasks-area { display: flex; flex-direction: column; gap: 8px; min-height: 40px; }
+
+/* ── TASK CARD ── */
+.task-card {
   background: var(--card2);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
+  position: relative;
+  animation: slideIn 0.2s ease;
 }
-.task:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(249,115,22,0.1);
+@keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+.task-card:hover { border-color: var(--muted); background: #1f2740; }
+.task-card.urgent {
+  border-color: rgba(239,68,68,0.4);
+  background: linear-gradient(to bottom, var(--card2), #1f1217);
 }
-.task.urgent {
-  border-color: var(--red);
-  background: rgba(239,68,68,0.08);
+.task-card.urgent::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--red);
+  border-radius: 10px 10px 0 0;
 }
 
-.task-title {
-  font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.task-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 11px;
-}
+.task-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; padding-right: 22px; line-height: 1.4; }
+.task-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
 .task-tag {
-  background: var(--border);
-  color: var(--muted);
-  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
   border-radius: 4px;
+  letter-spacing: 0.3px;
 }
-.task-tag.urgent {
-  background: rgba(239,68,68,0.2);
-  color: var(--red);
+.tag-sector { background: rgba(255,255,255,0.06); color: var(--muted2); }
+.tag-urgent { background: rgba(239,68,68,0.2); color: #f87171; }
+.tag-priority-alta { background: rgba(239,68,68,0.15); color: #f87171; }
+.tag-priority-media { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.tag-priority-baixa { background: rgba(16,185,129,0.15); color: #34d399; }
+
+.task-deadline { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+.task-deadline b { color: var(--yellow); }
+.task-deadline.overdue b { color: var(--red); }
+
+.task-actions {
+  position: absolute;
+  top: 10px; right: 10px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
 }
+.task-card:hover .task-actions { opacity: 1; }
+
+.action-btn {
+  width: 22px; height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.action-btn:hover { background: rgba(239,68,68,0.2); color: var(--red); }
+.action-btn.move:hover { background: rgba(59,130,246,0.2); color: var(--blue); }
+
+/* ── ADD TASK ── */
+.add-task-area {}
+.add-task-input-wrap { display: none; }
+.add-task-input-wrap.open { display: block; }
+.add-task-input-wrap input,
+.add-task-input-wrap select {
+  width: 100%;
+  background: #0d1120;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 12px;
+  margin-bottom: 6px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.add-task-input-wrap input:focus,
+.add-task-input-wrap select:focus { border-color: var(--accent); }
+.add-task-input-wrap select { cursor: pointer; color-scheme: dark; }
+
+.form-check { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 11px; color: var(--muted); cursor: pointer; }
+.form-check input { cursor: pointer; accent-color: var(--accent); width: auto; margin: 0; }
+.form-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.form-row input { margin-bottom: 0 !important; flex: 1; }
+.form-actions { display: flex; gap: 6px; }
 
 .btn-add-task {
   width: 100%;
   background: transparent;
   border: 1px dashed var(--border);
   color: var(--muted);
-  padding: 10px;
+  padding: 9px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
-  transition: all 0.15s;
   font-family: 'Ubuntu', sans-serif;
+  text-align: left;
 }
-.btn-add-task:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  background: rgba(249,115,22,0.05);
-}
+.btn-add-task:hover { border-color: var(--accent); color: var(--text); background: rgba(249,115,22,0.05); }
 
-/* DESIGNERS GRID */
-.designers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-}
-
-.designer-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.designer-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(249,115,22,0.15);
-}
-
-.designer-card-icon {
-  font-size: 32px;
-  line-height: 1;
-}
-
-.designer-card-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.designer-card-desc {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.designer-card-action {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.designer-card-action button {
-  width: 100%;
-  background: rgba(249,115,22,0.1);
-  border: 1px solid rgba(249,115,22,0.3);
-  color: var(--accent);
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 700;
-  transition: all 0.15s;
-  font-family: 'Ubuntu', sans-serif;
-}
-.designer-card-action button:hover {
-  background: rgba(249,115,22,0.2);
-  border-color: var(--accent);
-}
-
-/* MODAIS */
-.modal {
+/* ── MODAL ── */
+.modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.7);
-  z-index: 9000;
+  backdrop-filter: blur(4px);
+  z-index: 100;
   align-items: center;
   justify-content: center;
 }
-.modal.open {
-  display: flex;
-}
-
-.modal-content {
+.modal-overlay.open { display: flex; }
+.modal {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  border-radius: 16px;
+  padding: 28px;
+  width: 480px;
+  max-width: 95vw;
+  max-height: 90vh;
   overflow-y: auto;
-  animation: slideIn 0.3s ease;
+  animation: modalIn 0.2s ease;
 }
-@keyframes slideIn {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: none; opacity: 1; }
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-
-.modal-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.modal-close {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 20px;
-  cursor: pointer;
-  transition: color 0.15s;
-}
-.modal-close:hover { color: var(--text); }
-
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.form-group label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
+@keyframes modalIn { from { opacity:0; transform:scale(0.96) translateY(8px); } to { opacity:1; transform:none; } }
+.modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+.modal label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.modal input, .modal select, .modal textarea {
+  width: 100%;
   background: #0d1120;
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 8px;
-  border-radius: 6px;
+  border-radius: 8px;
+  padding: 9px 12px;
   font-family: 'Ubuntu', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  outline: none;
+  transition: border-color 0.15s;
 }
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.btn-save {
-  flex: 1;
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: 'Ubuntu', sans-serif;
-}
-.btn-save:hover { background: var(--accent2); }
-
-.btn-cancel {
-  flex: 1;
+.modal input:focus, .modal select:focus, .modal textarea:focus { border-color: var(--accent); }
+.modal select { cursor: pointer; color-scheme: dark; }
+.modal textarea { resize: vertical; min-height: 70px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.modal-close-x {
+  position: absolute;
+  top: 16px; right: 16px;
   background: transparent;
+  border: none;
   color: var(--muted);
-  border: 1px solid var(--border);
-  padding: 8px;
-  border-radius: 6px;
+  font-size: 18px;
   cursor: pointer;
-  font-size: 12px;
-  font-family: 'Ubuntu', sans-serif;
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
 }
-.btn-cancel:hover { background: var(--card2); color: var(--text); }
+.modal-close-x:hover { background: var(--card2); color: var(--text); }
+.modal { position: relative; }
 
-.list-items {
+/* ── TOAST ── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 300px;
-  overflow-y: auto;
 }
-
-.list-item {
+.toast {
   background: var(--card2);
   border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  min-width: 260px;
+  animation: toastIn 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@keyframes toastIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast.info { border-left: 3px solid var(--blue); }
+
+/* ── USERS VIEW ── */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.user-row {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.2s;
+}
+.user-row:hover { border-color: var(--muted); }
+.user-row-avatar {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.user-row-info { flex: 1; min-width: 0; }
+.user-row-name { font-size: 14px; font-weight: 700; }
+.user-row-email { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 4px;
+  display: inline-block;
+}
+.role-admin { background: rgba(139,92,246,0.2); color: #a78bfa; }
+.role-viewer { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.online-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  box-shadow: 0 0 6px var(--green);
+}
+.offline-dot { background: var(--muted); box-shadow: none; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  color: var(--muted);
+  gap: 6px;
+  font-size: 12px;
+}
+.empty-state .icon { font-size: 28px; opacity: 0.4; }
+
+/* ── DRAG & DROP ── */
+.task-card.dragging { opacity: 0.4; border-style: dashed; }
+.col.drag-over { background: rgba(249,115,22,0.05); border-color: rgba(249,115,22,0.4); }
+
+/* ── SEARCH BAR ── */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 12px;
+  transition: border-color 0.15s;
+}
+.search-bar:focus-within { border-color: var(--accent); }
+.search-bar input {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  outline: none;
+  width: 200px;
+}
+.search-bar input::placeholder { color: var(--muted); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .board { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { position: fixed; height: 100%; transform: translateX(-100%); }
+  .sidebar.mobile-open { transform: none; }
+  .main { margin-left: 0; }
+  .board { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap { background: var(--border); border-radius: 4px; height: 4px; margin-top: 8px; }
+.progress-bar { height: 4px; border-radius: 4px; transition: width 0.5s ease; }
+
+/* ── DETAIL PANEL ── */
+.detail-section { margin-top: 8px; }
+.notes-area {
+  width: 100%;
+  background: #0d1120;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 12px;
+  outline: none;
+  resize: none;
+  min-height: 60px;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.notes-area:focus { border-color: var(--accent); }
+.attachments-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card2);
+  padding: 6px 10px;
   border-radius: 6px;
-  padding: 10px;
+  font-size: 11px;
+  color: var(--muted2);
+}
+.attachment-item .attach-icon { color: var(--accent); }
+
+/* ── STATUS COLUMN COLORS ── */
+.col[data-col="solicitado"] .col-dot { background: var(--purple); }
+.col[data-col="producao"] .col-dot { background: var(--accent); }
+.col[data-col="aprovacao"] .col-dot { background: var(--blue); }
+.col[data-col="finalizado"] .col-dot { background: var(--green); }
+
+.col[data-col="solicitado"] { border-top: 2px solid var(--purple); }
+.col[data-col="producao"] { border-top: 2px solid var(--accent); }
+.col[data-col="aprovacao"] { border-top: 2px solid var(--blue); }
+.col[data-col="finalizado"] { border-top: 2px solid var(--green); }
+
+/* ── FIREBASE STATUS BADGE ── */
+.firebase-badge {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+.firebase-badge.online { background: rgba(16,185,129,0.15); color: var(--green); }
+.firebase-badge.offline { background: rgba(107,122,153,0.15); color: var(--muted); }
+
+/* ── SETTINGS VIEW ── */
+.settings-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.settings-section h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.settings-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 13px; font-weight: 700; }
+.settings-row-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.settings-input {
+  background: #0d1120;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 200px;
+}
+.settings-input:focus { border-color: var(--accent); }
+
+/* ══════════════════════════════════════════════════
+   CONFIGURAÇÕES DE TEMA E PERSONALIZAÇÃO
+   ══════════════════════════════════════════════════ */
+
+.theme-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.list-item-delete {
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--card2);
+}
+
+.theme-option:hover {
+  border-color: var(--accent);
+}
+
+.theme-option.active {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.1);
+}
+
+.theme-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.theme-preview.dark {
+  background: linear-gradient(135deg, #0b0e17 0%, #1c2235 100%);
+}
+
+.theme-preview.light {
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+}
+
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 10px;
+}
+
+.color-option {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  border-color: var(--text);
+}
+
+.color-option.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
+}
+
+.bg-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bg-upload-area:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.bg-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+/* ══════════════════════════════════════════════════
+   CONFIGURAÇÕES DE TEMA E PERSONALIZAÇÃO
+   ══════════════════════════════════════════════════ */
+
+.theme-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--card2);
+}
+
+.theme-option:hover {
+  border-color: var(--accent);
+}
+
+.theme-option.active {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.1);
+}
+
+.theme-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.theme-preview.dark {
+  background: linear-gradient(135deg, #0b0e17 0%, #1c2235 100%);
+}
+
+.theme-preview.light {
+  background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
+}
+
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 10px;
+}
+
+.color-option {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+  border-color: var(--text);
+}
+
+.color-option.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text);
+}
+
+.bg-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bg-upload-area:hover {
+  border-color: var(--accent);
+  background: rgba(249,115,22,0.05);
+}
+
+.bg-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+/* ══════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS
+   ══════════════════════════════════════════════════ */
+.mobile-menu-toggle {
+  display: none;
   background: transparent;
   border: none;
-  color: var(--red);
+  color: var(--text);
+  font-size: 20px;
   cursor: pointer;
-  font-size: 14px;
-  transition: color 0.15s;
-}
-.list-item-delete:hover { color: var(--red); }
-
-@media(max-width:1200px) {
-  .board { grid-template-columns: repeat(2, 1fr); }
-}
-@media(max-width:768px) {
-  .board { grid-template-columns: 1fr; }
-  .designers-grid { grid-template-columns: 1fr; }
+  padding: 8px 12px;
+  margin-right: 8px;
 }
 
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .mobile-menu-toggle { display: flex; align-items: center; }
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 240px;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+  .sidebar.mobile-open ~ .sidebar-overlay { display: block; }
+  .main { width: 100%; }
+  .topbar { height: 56px; padding: 0 12px; gap: 8px; }
+  .topbar-title { font-size: 14px; }
+  .topbar-actions { gap: 4px; }
+  .btn { padding: 6px 10px; font-size: 11px; }
+  .content { padding: 12px; gap: 12px; }
+  .task-card { padding: 12px; min-height: 80px; }
+  .task-title { font-size: 13px; }
+  .task-tags { flex-wrap: wrap; gap: 4px; }
+  .task-tag { font-size: 10px; padding: 3px 6px; }
+  .modal { width: 95vw !important; max-height: 90vh; border-radius: 16px; }
+  .modal-header { padding: 16px; }
+  .modal-body { padding: 16px; }
+  .modal-footer { padding: 12px 16px; gap: 8px; }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+  button { min-height: 44px; font-size: 14px; }
+  .stats-row { flex-direction: column; }
+  .stat-card { width: 100%; }
+  .kanban-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kanban-column { min-width: 280px; }
+  .users-grid { grid-template-columns: 1fr; }
+  .login-card { width: 95vw; padding: 24px 16px; }
+  .login-logo-mark { width: 40px; height: 40px; font-size: 14px; }
+  .login-logo-text { font-size: 18px; }
+  .login-field input { font-size: 16px; padding: 12px; min-height: 44px; }
+  .login-btn { min-height: 44px; font-size: 14px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-title { font-size: 12px; }
+  .topbar-title span { display: none; }
+  .btn { padding: 5px 8px; font-size: 10px; }
+  .content { padding: 8px; gap: 8px; }
+  .kanban-column { min-width: 260px; }
+  .task-card { padding: 10px; }
+  .modal { width: 98vw !important; }
+}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ══════════════════════════════════════════════════
+     TELA DE LOGIN
+     ══════════════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="login-logo-mark">JBX</div>
-      <div class="login-logo-text">JBX <span>HUB</span></div>
+      <div class="login-logo-mark" id="login-logo-mark">JBX</div>
+      <div class="login-logo-text"><span>JBX</span> HUB</div>
     </div>
-    <div class="login-subtitle">Bem-vindo ao seu dashboard criativo</div>
+    <div class="login-subtitle">
+      Sistema Operacional JBX Sports.<br>
+      Digite a senha para acessar o painel.
+    </div>
+
     <div class="login-field">
       <label>Senha de Acesso</label>
-      <input type="password" id="login-password" placeholder="Digite sua senha..." onkeypress="if(event.key==='Enter') doLogin()">
+      <input type="password" id="login-password" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') doLogin()">
     </div>
-    <button class="login-btn" onclick="doLogin()">Entrar</button>
+
+    <div class="login-error" id="login-error"></div>
+
+    <button class="login-btn" onclick="doLogin()">Entrar no Sistema</button>
+
+
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══════════════════════════════════════════════════
+     APP PRINCIPAL (oculto até login)
+     ══════════════════════════════════════════════════ -->
+<div id="app" style="display:none;width:100%;height:100%;display:none;flex-direction:row;">
+
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-mark">JBX</div>
-    <div class="logo-text">JBX <span>HUB</span></div>
+    <div class="logo-mark" id="logo-mark" onclick="triggerLogoUpload()" title="Clique para trocar o logo">
+      <span id="logo-mark-text">JBX</span>
+      <div class="logo-mark-overlay">🖼️</div>
+    </div>
+    <div class="logo-text"><span>JBX</span> HUB</div>
   </div>
 
-  <div class="sidebar-nav">
-    <div class="nav-section-label">VISTAS</div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
     <div class="nav-item active" onclick="showView('dashboard', this)">
-      <span>📊</span>
-      <span>Dashboard</span>
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
     </div>
     <div class="nav-item" onclick="showView('kanban', this)">
-      <span>📋</span>
-      <span>Quadro</span>
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Quadro de Tarefas</span>
+      <span class="nav-badge" id="nav-badge-total">0</span>
     </div>
-    <div class="nav-item" onclick="showView('designers', this)">
-      <span>🎨</span>
-      <span>Designers</span>
-    </div>
+      <div class="nav-item" onclick="showView('designers', this)">
+        <div class="nav-icon">🎨</div>
+        <div class="nav-label">Designers</div>
+        <div class="nav-badge" style="background:var(--purple)">NOVO</div>
+      </div>
+      <div class="nav-item" onclick="showView('users', this)">
+        <div class="nav-icon">👥</div>
+        <div class="nav-label">Usuários</div>
+      </div>
     <div class="nav-item" onclick="showView('settings', this)">
-      <span>⚙️</span>
-      <span>Configurações</span>
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Configurações</span>
     </div>
-  </div>
+
+    <div class="nav-section-label" style="margin-top:10px">Setores</div>
+    <div class="nav-item" id="nav-sector-all" onclick="filterAndGo('all', this)">
+      <span class="nav-icon">🌐</span>
+      <span class="nav-label">Todos os Setores</span>
+    </div>
+    <div class="nav-item" id="nav-sector-Loja" onclick="filterAndGo('Loja', this)">
+      <span class="nav-icon">🏪</span>
+      <span class="nav-label">Loja</span>
+    </div>
+    <div class="nav-item" id="nav-sector-Eventos" onclick="filterAndGo('Eventos', this)">
+      <span class="nav-icon">🏁</span>
+      <span class="nav-label">Eventos</span>
+    </div>
+    <div class="nav-item" id="nav-sector-Personalizados" onclick="filterAndGo('Personalizados', this)">
+      <span class="nav-icon">🎨</span>
+      <span class="nav-label">Personalizados</span>
+    </div>
+    <div class="nav-item" id="nav-sector-Marketplace" onclick="filterAndGo('Marketplace', this)">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">Marketplace</span>
+    </div>
+    <div class="nav-item" id="nav-sector-Instituto" onclick="filterAndGo('Instituto', this)">
+      <span class="nav-icon">🏢</span>
+      <span class="nav-label">Instituto</span>
+    </div>
+    <div class="nav-item" id="nav-sector-JBX Estruturas" onclick="filterAndGo('JBX Estruturas', this)">
+      <span class="nav-icon">🏗️</span>
+      <span class="nav-label">JBX Estruturas</span>
+    </div>
+  </nav>
 
   <div class="sidebar-footer">
-    <div class="theme-toggle">
-      <button class="theme-btn active" id="theme-dark" onclick="setTheme('dark')">🌙</button>
-      <button class="theme-btn" id="theme-light" onclick="setTheme('light')">☀️</button>
+    <button class="collapse-btn" onclick="toggleSidebar()">⇐ Recolher</button>
+    <div class="user-card" onclick="showView('users', null)">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">● ADMIN</div>
+      </div>
     </div>
-    <button class="logout-btn" onclick="doLogout()">🚪 Sair</button>
+    <button class="logout-btn" onclick="doLogout()">🚪 <span class="logout-label">Sair</span></button>
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
+  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    <div class="topbar-title" id="topbar-title">
+      Dashboard <span>Visão Geral</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="live-dot" id="live-dot" title="Status da conexão"></div>
+      <span style="font-size:11px;color:var(--muted);margin-right:4px;" id="live-label">AO VIVO</span>
+      <span class="firebase-badge" id="firebase-badge">LOCAL</span>
+      <span style="font-size:11px;color:var(--green);background:rgba(16,185,129,0.15);padding:4px 8px;border-radius:6px;border:1px solid rgba(16,185,129,0.3);" id="online-counter" title="Usuários online">👥 0 online</span>
+
+      <div class="search-bar">
+        <span style="color:var(--muted);font-size:14px">🔍</span>
+        <input type="text" placeholder="Buscar tarefas..." id="searchInput" oninput="onSearch()">
+      </div>
+
+      <button class="btn btn-primary" onclick="openNewTaskModal()">
+        ＋ Nova Tarefa
+      </button>
+    </div>
   </div>
 
+  <!-- CONTENT -->
   <div class="content">
-    <!-- DASHBOARD -->
-    <div id="view-dashboard" class="view-section active">
-      <h2>📊 Resumo das Tarefas</h2>
-      <div id="dashboard-content"></div>
+
+    <!-- ═══════════ DASHBOARD VIEW ═══════════ -->
+    <div class="view active" id="view-dashboard">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(139,92,246,0.15)">📥</div>
+          <div class="stat-info">
+            <div class="stat-label">Solicitados</div>
+            <div class="stat-value" id="stat-solicitado">0</div>
+            <div class="stat-sub" id="stat-solicitado-pct">— % do total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(249,115,22,0.15)">🎨</div>
+          <div class="stat-info">
+            <div class="stat-label">Em Produção</div>
+            <div class="stat-value" id="stat-producao">0</div>
+            <div class="stat-sub" id="stat-producao-pct">— % do total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(59,130,246,0.15)">📤</div>
+          <div class="stat-info">
+            <div class="stat-label">Aguardando</div>
+            <div class="stat-value" id="stat-aprovacao">0</div>
+            <div class="stat-sub" id="stat-aprovacao-pct">— % do total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(16,185,129,0.15)">✅</div>
+          <div class="stat-info">
+            <div class="stat-label">Finalizados</div>
+            <div class="stat-value" id="stat-finalizado">0</div>
+            <div class="stat-sub" id="stat-finalizado-pct">— % do total</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3>📊 Por Status</h3>
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="chartPie"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>📈 Por Setor</h3>
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="chartBar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size:13px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+          🚨 Demandas Urgentes
+        </h3>
+        <div id="urgent-list" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+      </div>
+
+      <div>
+        <h3 style="font-size:13px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+          📦 Progresso por Setor
+        </h3>
+        <div id="sector-progress" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
+      </div>
     </div>
 
-    <!-- KANBAN -->
-    <div id="view-kanban" class="view-section">
-      <h2>📋 Quadro de Tarefas</h2>
-      <div class="board" id="kanban-board"></div>
-    </div>
+    <!-- ═══════════ KANBAN VIEW ═══════════ -->
+    <div class="view" id="view-kanban">
+      <div class="kanban-header">
+        <h2>📋 Quadro de Trabalho <span id="filter-badge" style="font-size:12px;color:var(--accent);font-weight:400;margin-left:8px;">Tudo</span></h2>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-sector="all" onclick="setFilter('all', this)">Todos</button>
+          <button class="filter-tab" data-sector="Loja" onclick="setFilter('Loja', this)">🏪 Loja</button>
+          <button class="filter-tab" data-sector="Eventos" onclick="setFilter('Eventos', this)">🏁 Eventos</button>
+          <button class="filter-tab" data-sector="Personalizados" onclick="setFilter('Personalizados', this)">🎨 Personalizados</button>
+          <button class="filter-tab" data-sector="Marketplace" onclick="setFilter('Marketplace', this)">🛒 Marketplace</button>
+          <button class="filter-tab" data-sector="Instituto" onclick="setFilter('Instituto', this)">🏢 Instituto</button>
+          <button class="filter-tab" data-sector="JBX Estruturas" onclick="setFilter('JBX Estruturas', this)">🏗️ JBX Estruturas</button>
+        </div>
+      </div>
 
-    <!-- DESIGNERS -->
-    <div id="view-designers" class="view-section">
-      <h2>🎨 Recursos para Designers & Social Media</h2>
-      <div class="designers-grid" id="designers-grid"></div>
-    </div>
+      <div class="board">
+        <div class="col" data-col="solicitado" ondragover="onDragOver(event, this)" ondrop="onDrop(event, 'solicitado')" ondragleave="onDragLeave(this)">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <span class="col-title">Solicitado</span>
+            <span class="col-count" id="count-solicitado">0</span>
+          </div>
+          <div class="tasks-area" id="tasks-solicitado"></div>
+          <div class="add-task-area">
+            <div class="add-task-input-wrap" id="form-solicitado">
+              <input type="text" placeholder="Nome da demanda..." id="title-solicitado">
+              <select id="sector-solicitado">
+                <option value="Loja">Loja</option><option value="Eventos">Eventos</option>
+                <option value="Personalizados">Personalizados</option><option value="Marketplace">Marketplace</option>
+                <option value="Instituto">Instituto</option><option value="JBX Estruturas">JBX Estruturas</option>
+              </select>
+              <select id="priority-solicitado">
+                <option value="media">Prioridade: Média</option>
+                <option value="alta">Prioridade: Alta</option>
+                <option value="baixa">Prioridade: Baixa</option>
+              </select>
+              <label class="form-check"><input type="checkbox" id="urgent-solicitado"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-solicitado" placeholder="Prazo"></div>
+              <div class="form-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveTask('solicitado')">Criar</button>
+                <button class="btn btn-ghost btn-sm" onclick="closeForm('solicitado')">Cancelar</button>
+              </div>
+            </div>
+            <button class="btn-add-task" id="btn-add-solicitado" onclick="openForm('solicitado')">＋ Nova Tarefa</button>
+          </div>
+        </div>
 
-    <!-- SETTINGS -->
-    <div id="view-settings" class="view-section">
-      <h2>⚙️ Configurações</h2>
-      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px;">
-        <h3 style="margin-bottom: 16px;">🔐 Segurança</h3>
-        <label style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Nova Senha</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="password" id="settings-new-password" placeholder="Digite uma nova senha..." style="flex: 1; background: #0d1120; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 6px; font-family: 'Ubuntu', sans-serif;">
-          <button class="btn btn-primary btn-sm" onclick="changePassword()">Salvar</button>
+        <div class="col" data-col="producao" ondragover="onDragOver(event, this)" ondrop="onDrop(event, 'producao')" ondragleave="onDragLeave(this)">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <span class="col-title">Produção</span>
+            <span class="col-count" id="count-producao">0</span>
+          </div>
+          <div class="tasks-area" id="tasks-producao"></div>
+          <div class="add-task-area">
+            <div class="add-task-input-wrap" id="form-producao">
+              <input type="text" placeholder="Nome da demanda..." id="title-producao">
+              <select id="sector-producao">
+                <option value="Loja">Loja</option><option value="Eventos">Eventos</option>
+                <option value="Personalizados">Personalizados</option><option value="Marketplace">Marketplace</option>
+                <option value="Instituto">Instituto</option><option value="JBX Estruturas">JBX Estruturas</option>
+              </select>
+              <select id="priority-producao">
+                <option value="media">Prioridade: Média</option>
+                <option value="alta">Prioridade: Alta</option>
+                <option value="baixa">Prioridade: Baixa</option>
+              </select>
+              <label class="form-check"><input type="checkbox" id="urgent-producao"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-producao"></div>
+              <div class="form-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveTask('producao')">Criar</button>
+                <button class="btn btn-ghost btn-sm" onclick="closeForm('producao')">Cancelar</button>
+              </div>
+            </div>
+            <button class="btn-add-task" id="btn-add-producao" onclick="openForm('producao')">＋ Nova Tarefa</button>
+          </div>
+        </div>
+
+        <div class="col" data-col="aprovacao" ondragover="onDragOver(event, this)" ondrop="onDrop(event, 'aprovacao')" ondragleave="onDragLeave(this)">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <span class="col-title">Ag. Aprovação</span>
+            <span class="col-count" id="count-aprovacao">0</span>
+          </div>
+          <div class="tasks-area" id="tasks-aprovacao"></div>
+          <div class="add-task-area">
+            <div class="add-task-input-wrap" id="form-aprovacao">
+              <input type="text" placeholder="Nome da demanda..." id="title-aprovacao">
+              <select id="sector-aprovacao">
+                <option value="Loja">Loja</option><option value="Eventos">Eventos</option>
+                <option value="Personalizados">Personalizados</option><option value="Marketplace">Marketplace</option>
+                <option value="Instituto">Instituto</option><option value="JBX Estruturas">JBX Estruturas</option>
+              </select>
+              <select id="priority-aprovacao">
+                <option value="media">Prioridade: Média</option>
+                <option value="alta">Prioridade: Alta</option>
+                <option value="baixa">Prioridade: Baixa</option>
+              </select>
+              <label class="form-check"><input type="checkbox" id="urgent-aprovacao"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-aprovacao"></div>
+              <div class="form-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveTask('aprovacao')">Criar</button>
+                <button class="btn btn-ghost btn-sm" onclick="closeForm('aprovacao')">Cancelar</button>
+              </div>
+            </div>
+            <button class="btn-add-task" id="btn-add-aprovacao" onclick="openForm('aprovacao')">＋ Nova Tarefa</button>
+          </div>
+        </div>
+
+        <div class="col" data-col="finalizado" ondragover="onDragOver(event, this)" ondrop="onDrop(event, 'finalizado')" ondragleave="onDragLeave(this)">
+          <div class="col-header">
+            <div class="col-dot"></div>
+            <span class="col-title">Finalizado</span>
+            <span class="col-count" id="count-finalizado">0</span>
+          </div>
+          <div class="tasks-area" id="tasks-finalizado"></div>
+          <div class="add-task-area">
+            <div class="add-task-input-wrap" id="form-finalizado">
+              <input type="text" placeholder="Nome da demanda..." id="title-finalizado">
+              <select id="sector-finalizado">
+                <option value="Loja">Loja</option><option value="Eventos">Eventos</option>
+                <option value="Personalizados">Personalizados</option><option value="Marketplace">Marketplace</option>
+                <option value="Instituto">Instituto</option><option value="JBX Estruturas">JBX Estruturas</option>
+              </select>
+              <select id="priority-finalizado">
+                <option value="media">Prioridade: Média</option>
+                <option value="alta">Prioridade: Alta</option>
+                <option value="baixa">Prioridade: Baixa</option>
+              </select>
+              <label class="form-check"><input type="checkbox" id="urgent-finalizado"> 🚨 Marcar como Urgente</label>
+              <div class="form-row"><input type="date" id="date-finalizado"></div>
+              <div class="form-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveTask('finalizado')">Criar</button>
+                <button class="btn btn-ghost btn-sm" onclick="closeForm('finalizado')">Cancelar</button>
+              </div>
+            </div>
+            <button class="btn-add-task" id="btn-add-finalizado" onclick="openForm('finalizado')">＋ Nova Tarefa</button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- ═══════════ DESIGNERS VIEW ═══════════ -->
+    <div class="view" id="view-designers">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="font-size:15px;font-weight:700;">🎨 Recursos para Designers & Social Media</h2>
+      </div>
+      
+      <div class="designer-grid">
+        <!-- Biblioteca de Marcas -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">📁</div>
+            <div class="designer-card-title">Biblioteca de Marcas</div>
+          </div>
+          <div class="designer-card-desc">Identidades visuais, logos e paletas de cores organizadas por cliente.</div>
+          <div class="brand-library">
+            <div class="brand-item">
+              <div class="brand-logo">JBX</div>
+              <div class="brand-name">JBX Sports</div>
+            </div>
+            <div class="brand-item">
+              <div class="brand-logo">🛒</div>
+              <div class="brand-name">Marketplace</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendário Editorial -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">📅</div>
+            <div class="designer-card-title">Calendário Editorial</div>
+          </div>
+          <div class="designer-card-desc">Planejamento de postagens e campanhas de social media.</div>
+          <div class="calendar-wrapper">
+            <div class="calendar-grid">
+              <div class="calendar-day">1</div><div class="calendar-day has-event">2</div><div class="calendar-day">3</div>
+              <div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div><div class="calendar-day">7</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Central de Briefings -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">📝</div>
+            <div class="designer-card-title">Central de Briefings</div>
+          </div>
+          <div class="designer-card-desc">Formulários e solicitações detalhadas para novos projetos.</div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px;">📄 Ver Briefings Ativos</button>
+        </div>
+
+        <!-- Aprovações -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">⚖️</div>
+            <div class="designer-card-title">Área de Aprovações</div>
+          </div>
+          <div class="designer-card-desc">Controle de qualidade e aprovação final de artes e campanhas.</div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <span class="approval-status pending">⏳ 3 Pendentes</span>
+            <span class="approval-status approved">✅ 12 Aprovadas</span>
+          </div>
+        </div>
+
+        <!-- IA Prompts -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">🤖</div>
+            <div class="designer-card-title">Prompts de IA</div>
+          </div>
+          <div class="designer-card-desc">Biblioteca de prompts reutilizáveis para geração de imagens e textos.</div>
+          <div class="designer-card-meta">
+            <span class="designer-badge">Midjourney</span>
+            <span class="designer-badge">ChatGPT</span>
+          </div>
+        </div>
+
+        <!-- Referências -->
+        <div class="designer-card">
+          <div class="designer-card-header">
+            <div class="designer-card-icon">💡</div>
+            <div class="designer-card-title">Referências & Inspirações</div>
+          </div>
+          <div class="designer-card-desc">Moodboards e links de referências visuais para novos projetos.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ USERS VIEW ═══════════ -->
+    <div class="view" id="view-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <h2 style="font-size:15px;font-weight:700;">👥 Gerenciamento de Usuários</h2>
+        <button class="btn btn-primary" onclick="openUserModal()">＋ Criar Usuário</button>
+      </div>
+      <div class="users-grid" id="users-grid"></div>
+    </div>
+
+    <!-- ═══════════ SETTINGS VIEW ═══════════ -->
+    <div class="view" id="view-settings">
+      <h2 style="font-size:15px;font-weight:700;">⚙️ Configurações</h2>
+
+      <!-- Segurança -->
+      <div class="settings-section">
+        <h3>🔐 Segurança</h3>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Senha de Acesso</div>
+            <div class="settings-row-desc">Senha usada para entrar no sistema. Mínimo 4 caracteres.</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="password" class="settings-input" id="settings-new-password" placeholder="Nova senha..." style="min-width:160px;">
+            <button class="btn btn-primary btn-sm" onclick="changePassword()">Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logo -->
+      <div class="settings-section">
+        <h3>🎨 Identidade Visual</h3>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Logo do Sistema</div>
+            <div class="settings-row-desc">Imagem exibida na sidebar. Clique no logo da sidebar para trocar rapidamente.</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div id="settings-logo-preview" style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;color:white;overflow:hidden;"></div>
+            <button class="btn btn-ghost btn-sm" onclick="triggerLogoUpload()">📁 Trocar Logo</button>
+            <button class="btn btn-danger btn-sm" onclick="resetLogo()">↺ Resetar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Firebase -->
+      <div class="settings-section">
+        <h3>🔥 Firebase — Tempo Real</h3>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Status da Conexão</div>
+            <div class="settings-row-desc">Quando configurado, todos os navegadores compartilham os mesmos dados em tempo real.</div>
+          </div>
+          <span class="firebase-badge" id="settings-firebase-status">Verificando...</span>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Como Configurar o Firebase</div>
+            <div class="settings-row-desc" style="max-width:460px;line-height:1.6;">
+              1. Acesse <strong style="color:var(--accent);">console.firebase.google.com</strong><br>
+              2. Crie um projeto gratuito (plano Spark)<br>
+              3. Ative o <strong>Realtime Database</strong> no modo de teste<br>
+              4. Em "Configurações do projeto → Seus apps", copie as credenciais<br>
+              5. Cole no bloco <code style="background:var(--card2);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;color:var(--accent);">FIREBASE_CONFIG</code> no início do arquivo HTML
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aparência -->
+      <div class="settings-section">
+        <h3>🎨 Aparência e Personalização</h3>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Tema do Sistema</div>
+            <div class="settings-row-desc">Escolha entre o modo claro ou escuro.</div>
+          </div>
+          <div class="theme-selector">
+            <div class="theme-option" data-theme="dark" onclick="toggleTheme('dark')">
+              <div class="theme-preview dark"></div>
+              <span style="font-size:11px;font-weight:700;">Escuro</span>
+            </div>
+            <div class="theme-option" data-theme="light" onclick="toggleTheme('light')">
+              <div class="theme-preview light"></div>
+              <span style="font-size:11px;font-weight:700;">Claro</span>
+            </div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Fundo do Dashboard</div>
+            <div class="settings-row-desc">Personalize o fundo com uma cor ou imagem.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
+            <div class="color-picker-grid">
+              <div class="color-option" style="background:#0b0e17" onclick="setBgColor('#0b0e17')"></div>
+              <div class="color-option" style="background:#1a1c2c" onclick="setBgColor('#1a1c2c')"></div>
+              <div class="color-option" style="background:#2d1b33" onclick="setBgColor('#2d1b33')"></div>
+              <div class="color-option" style="background:#1b2d2d" onclick="setBgColor('#1b2d2d')"></div>
+              <div class="color-option" style="background:#f5f5f5" onclick="setBgColor('#f5f5f5')"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="el('bg-upload-input').click()">🖼️ Upload de Imagem</button>
+            <input type="file" id="bg-upload-input" style="display:none;" accept="image/*" onchange="handleBgUpload(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados -->
+      <div class="settings-section">
+        <h3>🗄️ Dados</h3>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Exportar Dados</div>
+            <div class="settings-row-desc">Baixar todas as tarefas e usuários em formato JSON.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportData()">⬇️ Exportar JSON</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Limpar Todos os Dados</div>
+            <div class="settings-row-desc">Remove todas as tarefas e usuários. Ação irreversível.</div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="clearAllData()">🗑️ Limpar Tudo</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- MODAIS -->
-<div id="modal-brands" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">📚 Biblioteca de Marcas</div>
-      <button class="modal-close" onclick="closeModal('modal-brands')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Nome da Marca</label>
-        <input type="text" id="brand-name" placeholder="Ex: JBX Sports">
-      </div>
-      <div class="form-group">
-        <label>Cor Primária</label>
-        <input type="color" id="brand-color" value="#f97316">
-      </div>
-      <div class="form-group">
-        <label>Descrição</label>
-        <textarea id="brand-desc" placeholder="Descrição da marca..."></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-save" onclick="saveBrand()">Adicionar</button>
-        <button class="btn-cancel" onclick="closeModal('modal-brands')">Cancelar</button>
-      </div>
-      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">MARCAS SALVAS</div>
-        <div class="list-items" id="brands-list"></div>
-      </div>
+</div><!-- /#app -->
+
+<!-- ═══════════ MODAL: NOVA TAREFA ═══════════ -->
+<div class="modal-overlay" id="modal-newtask" onclick="closeModalOverlay(event,'modal-newtask')">
+  <div class="modal">
+    <button class="modal-close-x" onclick="closeModal('modal-newtask')">✕</button>
+    <h2>＋ Nova Tarefa</h2>
+    <label>Título *</label>
+    <input type="text" id="modal-title" placeholder="Nome da demanda...">
+    <label>Setor *</label>
+    <select id="modal-sector">
+      <option value="">Selecionar setor...</option>
+      <option>Loja</option><option>Eventos</option><option>Personalizados</option>
+      <option>Marketplace</option><option>Instituto</option><option>JBX Estruturas</option>
+    </select>
+    <label>Coluna *</label>
+    <select id="modal-col">
+      <option value="solicitado">📥 Solicitado</option>
+      <option value="producao">🎨 Produção</option>
+      <option value="aprovacao">📤 Ag. Aprovação</option>
+      <option value="finalizado">✅ Finalizado</option>
+    </select>
+    <label>Prioridade</label>
+    <select id="modal-priority">
+      <option value="media">Média</option>
+      <option value="alta">Alta</option>
+      <option value="baixa">Baixa</option>
+    </select>
+    <label>Prazo</label>
+    <input type="date" id="modal-deadline">
+    <label>Descrição</label>
+    <textarea id="modal-desc" placeholder="Observações sobre a demanda..."></textarea>
+    <label class="form-check" style="margin-bottom:16px;font-size:12px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400;">
+      <input type="checkbox" id="modal-urgent" style="accent-color:var(--red);"> 🚨 Marcar como Urgente
+    </label>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-newtask')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFromModal()">Criar Tarefa</button>
     </div>
   </div>
 </div>
 
-<div id="modal-calendar" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">📅 Calendário Editorial</div>
-      <button class="modal-close" onclick="closeModal('modal-calendar')">✕</button>
+<!-- ═══════════ MODAL: DETALHE DA TAREFA ═══════════ -->
+<div class="modal-overlay" id="modal-detail" onclick="closeModalOverlay(event,'modal-detail')">
+  <div class="modal" style="width:520px;">
+    <button class="modal-close-x" onclick="closeModal('modal-detail')">✕</button>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <h2 id="detail-title" style="flex:1;cursor:pointer;padding:8px;border-radius:6px;transition:all 0.15s;" onclick="editTaskTitle()" title="Clique para editar">Título da Tarefa</h2>
+      <button class="btn btn-ghost btn-sm" onclick="editTaskTitle()" title="Editar título">✏️</button>
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Data do Post</label>
-        <input type="date" id="calendar-date">
-      </div>
-      <div class="form-group">
-        <label>Rede Social</label>
-        <select id="calendar-platform">
-          <option value="Instagram">Instagram</option>
-          <option value="Facebook">Facebook</option>
-          <option value="TikTok">TikTok</option>
-          <option value="LinkedIn">LinkedIn</option>
-          <option value="Twitter">Twitter</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Descrição do Post</label>
-        <textarea id="calendar-desc" placeholder="O que será postado?"></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-save" onclick="saveCalendarEvent()">Agendar</button>
-        <button class="btn-cancel" onclick="closeModal('modal-calendar')">Cancelar</button>
-      </div>
-      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">AGENDAMENTOS</div>
-        <div class="list-items" id="calendar-list"></div>
-      </div>
+    <input type="text" id="detail-title-input" style="display:none;width:100%;padding:10px;border:1px solid var(--accent);border-radius:8px;background:#0d1120;color:var(--text);font-size:16px;font-weight:700;margin-bottom:16px;" onkeydown="handleTitleKeydown(event)" onblur="saveTitleEdit()">
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="detail-tags"></div>
+
+    <label>Mover para coluna</label>
+    <select id="detail-col" onchange="moveTaskDetail()">
+      <option value="solicitado">📥 Solicitado</option>
+      <option value="producao">🎨 Produção</option>
+      <option value="aprovacao">📤 Ag. Aprovação</option>
+      <option value="finalizado">✅ Finalizado</option>
+    </select>
+
+    <label>Notas / Observações</label>
+    <textarea class="notes-area" id="detail-notes" placeholder="Escreva notas sobre esta tarefa..." rows="3" onchange="saveDetailNotes()"></textarea>
+
+    <label>Anexos</label>
+    <label style="display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--border);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--muted2);font-weight:700;margin-bottom:8px;transition:all 0.15s;text-transform:none;letter-spacing:0;">
+      📁 Selecionar Arquivo
+      <input type="file" style="display:none;" multiple onchange="handleFileAttach(this)">
+    </label>
+    <div class="attachments-list" id="detail-attachments"></div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn btn-danger btn-sm" onclick="deleteFromDetail()">🗑️ Deletar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-detail')">Fechar</button>
     </div>
   </div>
 </div>
 
-<div id="modal-briefings" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">📋 Central de Briefings</div>
-      <button class="modal-close" onclick="closeModal('modal-briefings')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Cliente</label>
-        <input type="text" id="briefing-client" placeholder="Nome do cliente">
-      </div>
-      <div class="form-group">
-        <label>Projeto</label>
-        <input type="text" id="briefing-project" placeholder="Nome do projeto">
-      </div>
-      <div class="form-group">
-        <label>Briefing</label>
-        <textarea id="briefing-content" placeholder="Detalhes do briefing..."></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-save" onclick="saveBriefing()">Salvar</button>
-        <button class="btn-cancel" onclick="closeModal('modal-briefings')">Cancelar</button>
-      </div>
-      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">BRIEFINGS ATIVOS</div>
-        <div class="list-items" id="briefings-list"></div>
-      </div>
+<!-- ═══════════ MODAL: CRIAR USUÁRIO ═══════════ -->
+<div class="modal-overlay" id="modal-user" onclick="closeModalOverlay(event,'modal-user')">
+  <div class="modal" style="width:400px;">
+    <button class="modal-close-x" onclick="closeModal('modal-user')">✕</button>
+    <h2>👤 Criar Usuário</h2>
+    <label>Nome *</label>
+    <input type="text" id="user-name" placeholder="Nome completo">
+    <label>Email *</label>
+    <input type="email" id="user-email" placeholder="email@empresa.com">
+    <label>Role</label>
+    <select id="user-role">
+      <option value="viewer">Viewer (apenas visualiza)</option>
+      <option value="admin">Admin (gerencia tudo)</option>
+    </select>
+    <label>Setor</label>
+    <select id="user-sector">
+      <option value="">Sem setor específico</option>
+      <option>Loja</option><option>Eventos</option><option>Personalizados</option>
+      <option>Marketplace</option><option>Instituto</option><option>JBX Estruturas</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-user')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Criar</button>
     </div>
   </div>
 </div>
 
-<div id="modal-prompts" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">✨ Prompts de IA Reutilizáveis</div>
-      <button class="modal-close" onclick="closeModal('modal-prompts')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Nome do Prompt</label>
-        <input type="text" id="prompt-name" placeholder="Ex: Gerador de Banners">
-      </div>
-      <div class="form-group">
-        <label>Prompt (para Midjourney, ChatGPT, etc)</label>
-        <textarea id="prompt-content" placeholder="Cole seu prompt aqui..."></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-save" onclick="savePrompt()">Salvar</button>
-        <button class="btn-cancel" onclick="closeModal('modal-prompts')">Cancelar</button>
-      </div>
-      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">PROMPTS SALVOS</div>
-        <div class="list-items" id="prompts-list"></div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toasts"></div>
 
-<div id="modal-approvals" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">✅ Área de Aprovações</div>
-      <button class="modal-close" onclick="closeModal('modal-approvals')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Nome da Arte/Peça</label>
-        <input type="text" id="approval-name" placeholder="Ex: Banner Verão 2026">
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="approval-status">
-          <option value="Pendente">⏳ Pendente</option>
-          <option value="Aprovado">✅ Aprovado</option>
-          <option value="Revisão">🔄 Revisão</option>
-          <option value="Rejeitado">❌ Rejeitado</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Observações</label>
-        <textarea id="approval-notes" placeholder="Feedback do cliente..."></textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn-save" onclick="saveApproval()">Registrar</button>
-        <button class="btn-cancel" onclick="closeModal('modal-approvals')">Cancelar</button>
-      </div>
-      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-        <div style="font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">HISTÓRICO DE APROVAÇÕES</div>
-        <div class="list-items" id="approvals-list"></div>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- INPUT FILE OCULTO PARA LOGO -->
+<input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoFile(this)">
 
 <script>
-const DEFAULT_PASSWORD = 'jbx2026';
-const COLS = ['solicitado','producao','aprovacao','finalizado'];
-const SECTORS = ['Loja','Eventos','Personalizados','Marketplace'];
-const COL_LABELS = { solicitado:'Solicitado', producao:'Produção', aprovacao:'Ag. Aprovação', finalizado:'Finalizado' };
+// ═══════════════════════════════════════════════════════════════
+// ⚙️  CONFIGURAÇÕES EDITÁVEIS
+// ═══════════════════════════════════════════════════════════════
+const DEFAULT_PASSWORD = 'jbx2026'; // Senha padrão de fábrica
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const COLS     = ['solicitado','producao','aprovacao','finalizado'];
+const SECTORS  = ['Loja','Eventos','Personalizados','Marketplace','Instituto','JBX Estruturas'];
+const COL_COLORS  = { solicitado:'#8b5cf6', producao:'#f97316', aprovacao:'#3b82f6', finalizado:'#10b981' };
+const COL_LABELS  = { solicitado:'Solicitado', producao:'Produção', aprovacao:'Ag. Aprovação', finalizado:'Finalizado' };
+const PRIORITY_COLORS = { alta:'var(--red)', media:'var(--yellow)', baixa:'var(--green)' };
 
 let state = {
-  theme: localStorage.getItem('jbxhub_theme') || 'dark',
+  filter: 'all',
+  search: '',
+  detailTaskId: null,
   tasks: [
-    { id:'1', col:'solicitado', title:'Identidade Visual Verão', sector:'Loja', urgent:true, deadline:'2026-06-15' },
-    { id:'2', col:'producao', title:'Camisetas Oficiais Estampa', sector:'Personalizados', urgent:false, deadline:'2026-06-20' },
-    { id:'3', col:'aprovacao', title:'Canecas Porcelana Mockup', sector:'Eventos', urgent:true, deadline:'2026-06-08' },
-    { id:'4', col:'finalizado', title:'Banner Promocional Drop X', sector:'Marketplace', urgent:false, deadline:'' },
+    { id:'1', col:'solicitado', title:'Identidade Visual Verão', sector:'Loja', urgent:true, priority:'alta', deadline:'2026-06-15', desc:'Criar nova identidade visual para coleção verão.', notes:'', files:[] },
+    { id:'2', col:'producao', title:'Camisetas Oficiais Estampa', sector:'Personalizados', urgent:false, priority:'media', deadline:'2026-06-20', desc:'', notes:'Aguardando aprovação do briefing.', files:[] },
+    { id:'3', col:'aprovacao', title:'Canecas Porcelana Mockup', sector:'Eventos', urgent:true, priority:'alta', deadline:'2026-06-08', desc:'Mockup para aprovação de cliente.', notes:'Aguardando conferência de cores.', files:['caneca_v1.png'] },
+    { id:'4', col:'finalizado', title:'Banner Promocional Drop X', sector:'Marketplace', urgent:false, priority:'baixa', deadline:'', desc:'Banner para campanha Drop X no marketplace.', notes:'Pronto e enviado para produção.', files:['banner_final.pdf'] },
+    { id:'5', col:'solicitado', title:'Post Instagram Lançamento', sector:'Loja', urgent:false, priority:'media', deadline:'2026-06-25', desc:'', notes:'', files:[] },
+    { id:'6', col:'producao', title:'Flyer Evento Corrida', sector:'Eventos', urgent:true, priority:'alta', deadline:'2026-06-10', desc:'Flyer A4 para corrida de rua.', notes:'', files:[] },
+    { id:'7', col:'aprovacao', title:'Embalagem Produto Exclusivo', sector:'Personalizados', urgent:false, priority:'media', deadline:'2026-06-30', desc:'', notes:'', files:[] },
+    { id:'8', col:'finalizado', title:'Catálogo Instituto 2026', sector:'Instituto', urgent:false, priority:'baixa', deadline:'', desc:'', notes:'Aprovado pelo cliente.', files:['catalogo_2026.pdf'] },
   ],
-  brands: JSON.parse(localStorage.getItem('jbxhub_brands') || '[]'),
-  calendar: JSON.parse(localStorage.getItem('jbxhub_calendar') || '[]'),
-  briefings: JSON.parse(localStorage.getItem('jbxhub_briefings') || '[]'),
-  prompts: JSON.parse(localStorage.getItem('jbxhub_prompts') || '[]'),
-  approvals: JSON.parse(localStorage.getItem('jbxhub_approvals') || '[]'),
+  users: [
+    { id:'1', name:'Admin JBX', email:'infinitystamprp@gmail.com', role:'admin', sector:'', online:true },
+    { id:'2', name:'Sophia Bezerra', email:'sb@jbxsports.com.br', role:'viewer', sector:'Loja', online:true },
+    { id:'3', name:'Monique Camargo', email:'moniquecamargo@jbxsports.com.br', role:'viewer', sector:'Eventos', online:false },
+    { id:'4', name:'Guilherme Carvalho', email:'guilhermecarvalho@jbxsports.com.br', role:'viewer', sector:'Personalizados', online:true },
+    { id:'5', name:'Suporte', email:'suporte@jbxsports.com.br', role:'viewer', sector:'', online:false },
+  ]
 };
 
-// AUTH
+// ── CHARTS ──
+let pieChart = null;
+let barChart = null;
+
+// ── FIREBASE LISTENER FLAG ──
+let fbListenerActive = false;
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN / LOGOUT
+// ═══════════════════════════════════════════════════════════════
+// MOBILE MENU TOGGLE
+function toggleMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle('mobile-open');
+  }
+}
+
+function closeMobileMenu() {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove('mobile-open');
+  }
+}
+
 function getPassword() {
   return localStorage.getItem('jbxhub_password') || DEFAULT_PASSWORD;
 }
@@ -938,393 +2718,1018 @@ function doLogin() {
   const input = document.getElementById('login-password').value;
   if (input === getPassword()) {
     document.getElementById('login-screen').classList.add('hidden');
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
     initApp();
   } else {
-    alert('❌ Senha incorreta');
+    const err = document.getElementById('login-error');
+    err.textContent = '❌ Senha incorreta. Tente novamente.';
     document.getElementById('login-password').value = '';
+    document.getElementById('login-password').focus();
+    setTimeout(() => { err.textContent = ''; }, 3000);
   }
 }
 
 function doLogout() {
-  if (!confirm('Deseja sair?')) return;
+  if (!confirm('Deseja sair do sistema?')) return;
+  document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('login-password').value = '';
+  document.getElementById('login-error').textContent = '';
 }
 
 function changePassword() {
   const newPwd = document.getElementById('settings-new-password').value.trim();
-  if (newPwd.length < 4) { alert('Mínimo 4 caracteres'); return; }
+  if (newPwd.length < 4) { toast('A senha deve ter no mínimo 4 caracteres', 'error'); return; }
   localStorage.setItem('jbxhub_password', newPwd);
   document.getElementById('settings-new-password').value = '';
-  alert('✅ Senha alterada!');
+  toast('Senha alterada com sucesso!', 'success');
 }
 
-// TEMA
-function setTheme(theme) {
-  state.theme = theme;
-  if (theme === 'light') {
-    document.body.classList.add('light-mode');
-  } else {
-    document.body.classList.remove('light-mode');
-  }
-  localStorage.setItem('jbxhub_theme', theme);
-  document.getElementById('theme-dark').classList.toggle('active', theme === 'dark');
-  document.getElementById('theme-light').classList.toggle('active', theme === 'light');
+// ═══════════════════════════════════════════════════════════════
+// LOGO
+// ═══════════════════════════════════════════════════════════════
+function triggerLogoUpload() {
+  document.getElementById('logo-file-input').click();
 }
 
-// VISTAS
-function showView(id, navEl) {
-  document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-  document.getElementById(`view-${id}`).classList.add('active');
-  
-  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-  navEl.classList.add('active');
-  
-  const titles = {
-    dashboard: 'Dashboard',
-    kanban: 'Quadro de Tarefas',
-    designers: 'Recursos para Designers',
-    settings: 'Configurações'
+function handleLogoFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    applyLogo(dataUrl);
+    localStorage.setItem('jbxhub_logo', dataUrl);
+    toast('Logo atualizado!', 'success');
   };
-  document.getElementById('topbar-title').textContent = titles[id] || id;
-  
-  if (id === 'kanban') renderKanban();
-  if (id === 'dashboard') renderDashboard();
-  if (id === 'designers') renderDesigners();
+  reader.readAsDataURL(file);
+  input.value = '';
 }
 
-// DASHBOARD
-function renderDashboard() {
-  const content = document.getElementById('dashboard-content');
-  const stats = {};
-  COLS.forEach(col => stats[col] = state.tasks.filter(t => t.col === col).length);
-  
-  content.innerHTML = `
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
-      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">Solicitado</div>
-        <div style="font-size: 28px; font-weight: 700; color: var(--text);">${stats.solicitado}</div>
-      </div>
-      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">Produção</div>
-        <div style="font-size: 28px; font-weight: 700; color: var(--text);">${stats.producao}</div>
-      </div>
-      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">Aprovação</div>
-        <div style="font-size: 28px; font-weight: 700; color: var(--text);">${stats.aprovacao}</div>
-      </div>
-      <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">Finalizado</div>
-        <div style="font-size: 28px; font-weight: 700; color: var(--text);">${stats.finalizado}</div>
-      </div>
-    </div>
-  `;
+function applyLogo(dataUrl) {
+  // Sidebar logo mark
+  const mark = document.getElementById('logo-mark');
+  if (dataUrl) {
+    mark.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:6px;">
+      <div class="logo-mark-overlay">🖼️</div>`;
+  } else {
+    mark.innerHTML = `<span id="logo-mark-text">JBX</span><div class="logo-mark-overlay">🖼️</div>`;
+    mark.style.background = 'linear-gradient(135deg, var(--accent), #c2410c)';
+  }
+
+  // Login screen logo mark
+  const loginMark = document.getElementById('login-logo-mark');
+  if (loginMark) {
+    if (dataUrl) {
+      loginMark.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:10px;">`;
+    } else {
+      loginMark.textContent = 'JBX';
+    }
+  }
+
+  // Settings preview
+  const preview = document.getElementById('settings-logo-preview');
+  if (preview) {
+    if (dataUrl) {
+      preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">`;
+    } else {
+      preview.textContent = 'JBX';
+    }
+  }
 }
 
-// KANBAN
-function renderKanban() {
-  const board = document.getElementById('kanban-board');
-  board.innerHTML = '';
-  
-  COLS.forEach(col => {
-    const tasks = state.tasks.filter(t => t.col === col);
-    const colEl = document.createElement('div');
-    colEl.className = 'col';
-    
-    let html = `
-      <div class="col-header">
-        <div class="col-title">${COL_LABELS[col]}</div>
-        <div class="col-count">${tasks.length}</div>
-      </div>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-    `;
-    
-    tasks.forEach(task => {
-      const deadline = task.deadline ? new Date(task.deadline).toLocaleDateString('pt-BR') : '';
-      html += `
-        <div class="task ${task.urgent ? 'urgent' : ''}">
-          <div class="task-title">${task.title}</div>
-          <div class="task-meta">
-            <span class="task-tag">${task.sector}</span>
-            ${task.urgent ? '<span class="task-tag urgent">🚨</span>' : ''}
-          </div>
-          ${deadline ? `<div style="font-size: 11px; color: var(--muted); margin-top: 6px;">📅 ${deadline}</div>` : ''}
-        </div>
-      `;
-    });
-    
-    html += `
-      </div>
-      <button class="btn-add-task" onclick="alert('Novo formulário de tarefa')">＋ Nova</button>
-    `;
-    
-    colEl.innerHTML = html;
-    board.appendChild(colEl);
+function resetLogo() {
+  localStorage.removeItem('jbxhub_logo');
+  applyLogo(null);
+  toast('Logo resetado', 'info');
+}
+
+function loadLogo() {
+  const saved = localStorage.getItem('jbxhub_logo');
+  if (saved) applyLogo(saved);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FIREBASE — TEMPO REAL
+// ═══════════════════════════════════════════════════════════════
+function setupFirebase() {
+  const fb = window._fb;
+  if (!fb || !fb.enabled) {
+    updateFirebaseUI(false);
+    return;
+  }
+
+  updateFirebaseUI(true);
+
+  // Escuta mudanças em /jbxhub/tasks
+  const tasksRef = fb.ref(fb.db, 'jbxhub/tasks');
+  fb.onValue(tasksRef, snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      state.tasks = Object.values(data);
+    } else {
+      // Primeiro acesso: sobe os dados iniciais
+      pushTasksToFirebase();
+    }
+    render();
+  });
+
+  // Escuta mudanças em /jbxhub/users
+  const usersRef = fb.ref(fb.db, 'jbxhub/users');
+  fb.onValue(usersRef, snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      state.users = Object.values(data);
+      renderUsers();
+    } else {
+      pushUsersToFirebase();
+    }
+  });
+
+  fbListenerActive = true;
+}
+
+function pushTasksToFirebase() {
+  const fb = window._fb;
+  if (!fb || !fb.enabled) return;
+  const tasksObj = {};
+  state.tasks.forEach(t => { tasksObj[t.id] = t; });
+  fb.set(fb.ref(fb.db, 'jbxhub/tasks'), tasksObj).catch(console.warn);
+}
+
+function pushUsersToFirebase() {
+  const fb = window._fb;
+  if (!fb || !fb.enabled) return;
+  const usersObj = {};
+  state.users.forEach(u => { usersObj[u.id] = u; });
+  fb.set(fb.ref(fb.db, 'jbxhub/users'), usersObj).catch(console.warn);
+}
+
+function updateFirebaseUI(online) {
+  const dot   = document.getElementById('live-dot');
+  const label = document.getElementById('live-label');
+  const badge = document.getElementById('firebase-badge');
+  const settingsBadge = document.getElementById('settings-firebase-status');
+
+  if (online) {
+    dot.classList.remove('offline');
+    label.textContent = 'AO VIVO';
+    badge.className = 'firebase-badge online';
+    badge.textContent = '🔥 FIREBASE';
+    if (settingsBadge) { settingsBadge.className = 'firebase-badge online'; settingsBadge.textContent = '✅ Conectado'; }
+  } else {
+    dot.classList.add('offline');
+    label.textContent = 'LOCAL';
+    badge.className = 'firebase-badge offline';
+    badge.textContent = '💾 LOCAL';
+    if (settingsBadge) { settingsBadge.className = 'firebase-badge offline'; settingsBadge.textContent = '⚠️ Não configurado'; }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PERSISTÊNCIA (localStorage — fallback quando sem Firebase)
+// ═══════════════════════════════════════════════════════════════
+function saveState() {
+  try {
+    localStorage.setItem('jbxhub', JSON.stringify({ tasks: state.tasks, users: state.users }));
+  } catch(e) {}
+
+  // Sincroniza com Firebase se disponível
+  if (window._fb && window._fb.enabled) {
+    pushTasksToFirebase();
+    pushUsersToFirebase();
+  }
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('jbxhub');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.tasks) state.tasks = parsed.tasks;
+      if (parsed.users) state.users = parsed.users;
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════════════
+function initCharts() {
+  const pieCtx = document.getElementById('chartPie').getContext('2d');
+  const barCtx = document.getElementById('chartBar').getContext('2d');
+
+  pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0, borderRadius: 4 }] },
+    options: {
+      cutout: '65%',
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#9aa4b2', font: { size: 11 }, padding: 12, boxWidth: 10 } },
+        tooltip: { backgroundColor: '#1c2235', bodyColor: '#e8edf5', titleColor: '#e8edf5' }
+      },
+      animation: { animateRotate: true }
+    }
+  });
+
+  barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: { labels: [], datasets: [{ label: 'Tarefas', data: [], backgroundColor: 'rgba(249,115,22,0.7)', borderRadius: 6, borderWidth: 0 }] },
+    options: {
+      scales: {
+        x: { ticks: { color: '#6b7a99', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: '#6b7a99', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true, stepSize: 1 }
+      },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1c2235', bodyColor: '#e8edf5', titleColor: '#e8edf5' } }
+    }
   });
 }
 
-// DESIGNERS
-function renderDesigners() {
-  const grid = document.getElementById('designers-grid');
-  grid.innerHTML = `
-    <div class="designer-card" onclick="openModal('modal-brands')">
-      <div class="designer-card-icon">📚</div>
-      <div class="designer-card-title">Biblioteca de Marcas</div>
-      <div class="designer-card-desc">Identidades visuais, logos e paletas de cores organizadas por cliente.</div>
-      <div class="designer-card-action"><button>Abrir</button></div>
+function updateCharts() {
+  const byCols = {};
+  COLS.forEach(c => byCols[c] = 0);
+  const bySector = {};
+  SECTORS.forEach(s => bySector[s] = 0);
+
+  state.tasks.forEach(t => {
+    byCols[t.col]++;
+    if (bySector[t.sector] !== undefined) bySector[t.sector]++;
+  });
+
+  pieChart.data.labels = Object.keys(byCols).map(c => COL_LABELS[c]);
+  pieChart.data.datasets[0].data = Object.values(byCols);
+  pieChart.data.datasets[0].backgroundColor = Object.keys(byCols).map(c => COL_COLORS[c]);
+  pieChart.update();
+
+  barChart.data.labels = SECTORS.map(s => s.replace(' ', '\n'));
+  barChart.data.datasets[0].data = SECTORS.map(s => bySector[s]);
+  barChart.update();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function render() {
+  renderStats();
+  renderKanban();
+  renderDashboardWidgets();
+  renderUsers();
+  updateCharts();
+  updateNavBadge();
+  updateOnlineCounter();
+}
+
+function updateOnlineCounter() {
+  const onlineCount = state.users.filter(u => u.online).length;
+  const counter = el('online-counter');
+  if (counter) {
+    counter.textContent = `👥 ${onlineCount} online`;
+    counter.title = `${onlineCount} usuário(s) online agora`;
+  }
+}
+
+function renderStats() {
+  const total = state.tasks.length;
+  COLS.forEach(col => {
+    const count = state.tasks.filter(t => t.col === col).length;
+    const pct = total > 0 ? Math.round(count/total*100) : 0;
+    el(`stat-${col}`).textContent = count;
+    el(`stat-${col}-pct`).textContent = `${pct}% do total`;
+  });
+}
+
+function renderKanban() {
+  const query = state.search.toLowerCase();
+  COLS.forEach(col => {
+    const container = el(`tasks-${col}`);
+    container.innerHTML = '';
+
+    const filtered = state.tasks.filter(t => {
+      const matchSector = state.filter === 'all' || t.sector === state.filter;
+      const matchSearch = !query || t.title.toLowerCase().includes(query) || t.sector.toLowerCase().includes(query);
+      return t.col === col && matchSector && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><span>Nenhuma tarefa</span></div>`;
+    } else {
+      filtered.forEach(task => container.appendChild(buildTaskCard(task)));
+    }
+
+    el(`count-${col}`).textContent = filtered.length;
+  });
+}
+
+function buildTaskCard(task) {
+  const div = document.createElement('div');
+  div.className = `task-card${task.urgent ? ' urgent' : ''}`;
+  div.dataset.id = task.id;
+  div.draggable = true;
+  div.addEventListener('dragstart', e => onDragStart(e, task.id));
+  div.addEventListener('dragend', e => onDragEnd(e));
+
+  const deadline = task.deadline ? fmtDate(task.deadline) : '';
+  const isOverdue = task.deadline && new Date(task.deadline) < new Date();
+
+  const priorityClass = `tag-priority-${task.priority || 'media'}`;
+  const priorityLabel = { alta:'🔴 Alta', media:'🟡 Média', baixa:'🟢 Baixa' }[task.priority || 'media'];
+
+  div.innerHTML = `
+    <div class="task-title">${task.title}</div>
+    <div class="task-actions">
+      <button class="action-btn" title="Deletar" onclick="deleteTask('${task.id}')">✕</button>
     </div>
-    
-    <div class="designer-card" onclick="openModal('modal-calendar')">
-      <div class="designer-card-icon">📅</div>
-      <div class="designer-card-title">Calendário Editorial</div>
-      <div class="designer-card-desc">Planeje postagens e campanhas em diferentes redes sociais.</div>
-      <div class="designer-card-action"><button>Abrir</button></div>
+    <div class="task-tags">
+      <span class="task-tag tag-sector">${task.sector}</span>
+      <span class="task-tag ${priorityClass}">${priorityLabel}</span>
+      ${task.urgent ? `<span class="task-tag tag-urgent">🚨 URGENTE</span>` : ''}
+      ${task.files && task.files.length > 0 ? `<span class="task-tag" style="background:rgba(249,115,22,0.1);color:var(--accent);">📎 ${task.files.length}</span>` : ''}
     </div>
-    
-    <div class="designer-card" onclick="openModal('modal-briefings')">
-      <div class="designer-card-icon">📋</div>
-      <div class="designer-card-title">Central de Briefings</div>
-      <div class="designer-card-desc">Armazene e organize briefings de clientes e projetos.</div>
-      <div class="designer-card-action"><button>Abrir</button></div>
-    </div>
-    
-    <div class="designer-card" onclick="openModal('modal-approvals')">
-      <div class="designer-card-icon">✅</div>
-      <div class="designer-card-title">Área de Aprovações</div>
-      <div class="designer-card-desc">Controle o status de aprovação de artes e campanhas.</div>
-      <div class="designer-card-action"><button>Abrir</button></div>
-    </div>
-    
-    <div class="designer-card" onclick="openModal('modal-prompts')">
-      <div class="designer-card-icon">✨</div>
-      <div class="designer-card-title">Prompts de IA</div>
-      <div class="designer-card-desc">Biblioteca de prompts reutilizáveis para Midjourney, ChatGPT e mais.</div>
-      <div class="designer-card-action"><button>Abrir</button></div>
-    </div>
+    ${deadline ? `<div class="task-deadline${isOverdue ? ' overdue' : ''}">📅 <b>${deadline}</b>${isOverdue ? ' (atrasado)' : ''}</div>` : ''}
   `;
-  
-  renderBrandsList();
-  renderCalendarList();
-  renderBriefingsList();
-  renderPromptsList();
-  renderApprovalsList();
+
+  div.addEventListener('click', e => {
+    if (e.target.closest('.action-btn')) return;
+    openDetail(task.id);
+  });
+
+  return div;
 }
 
-// MODAIS
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// BRANDS
-function saveBrand() {
-  const name = document.getElementById('brand-name').value.trim();
-  const color = document.getElementById('brand-color').value;
-  const desc = document.getElementById('brand-desc').value.trim();
-  
-  if (!name) { alert('Digite o nome da marca'); return; }
-  
-  state.brands.push({ id: Date.now(), name, color, desc });
-  localStorage.setItem('jbxhub_brands', JSON.stringify(state.brands));
-  
-  document.getElementById('brand-name').value = '';
-  document.getElementById('brand-color').value = '#f97316';
-  document.getElementById('brand-desc').value = '';
-  
-  renderBrandsList();
-}
-
-function renderBrandsList() {
-  const list = document.getElementById('brands-list');
-  list.innerHTML = state.brands.map(b => `
-    <div class="list-item">
-      <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-        <div style="width: 16px; height: 16px; background: ${b.color}; border-radius: 4px;"></div>
+function renderDashboardWidgets() {
+  const urgentList = el('urgent-list');
+  const urgents = state.tasks.filter(t => t.urgent);
+  if (urgents.length === 0) {
+    urgentList.innerHTML = `<span style="color:var(--muted);font-size:13px;">✅ Sem demandas urgentes no momento</span>`;
+  } else {
+    urgentList.innerHTML = urgents.map(t => `
+      <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="openDetail('${t.id}')">
+        <span style="font-size:18px;">🚨</span>
         <div>
-          <div style="font-weight: 700;">${b.name}</div>
-          <div style="font-size: 11px; color: var(--muted);">${b.desc}</div>
+          <div style="font-size:13px;font-weight:700;">${t.title}</div>
+          <div style="font-size:11px;color:var(--muted);">${t.sector} · ${COL_LABELS[t.col]}${t.deadline ? ' · ' + fmtDate(t.deadline) : ''}</div>
         </div>
       </div>
-      <button class="list-item-delete" onclick="deleteBrand(${b.id})">❌</button>
-    </div>
-  `).join('');
-}
+    `).join('');
+  }
 
-function deleteBrand(id) {
-  state.brands = state.brands.filter(b => b.id !== id);
-  localStorage.setItem('jbxhub_brands', JSON.stringify(state.brands));
-  renderBrandsList();
-}
+  const sectorProg = el('sector-progress');
+  const bySector = {};
+  SECTORS.forEach(s => bySector[s] = { total: 0, done: 0 });
+  state.tasks.forEach(t => {
+    if (bySector[t.sector]) {
+      bySector[t.sector].total++;
+      if (t.col === 'finalizado') bySector[t.sector].done++;
+    }
+  });
 
-// CALENDAR
-function saveCalendarEvent() {
-  const date = document.getElementById('calendar-date').value;
-  const platform = document.getElementById('calendar-platform').value;
-  const desc = document.getElementById('calendar-desc').value.trim();
-  
-  if (!date || !desc) { alert('Preencha todos os campos'); return; }
-  
-  state.calendar.push({ id: Date.now(), date, platform, desc });
-  localStorage.setItem('jbxhub_calendar', JSON.stringify(state.calendar));
-  
-  document.getElementById('calendar-date').value = '';
-  document.getElementById('calendar-desc').value = '';
-  
-  renderCalendarList();
-}
-
-function renderCalendarList() {
-  const list = document.getElementById('calendar-list');
-  list.innerHTML = state.calendar.map(c => `
-    <div class="list-item">
-      <div>
-        <div style="font-weight: 700;">${new Date(c.date).toLocaleDateString('pt-BR')} - ${c.platform}</div>
-        <div style="font-size: 11px; color: var(--muted);">${c.desc}</div>
+  sectorProg.innerHTML = SECTORS.map(s => {
+    const { total, done } = bySector[s];
+    if (total === 0) return '';
+    const pct = Math.round(done/total*100);
+    return `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;font-weight:700;">${s}</span>
+          <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;">${done}/${total}</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" style="width:${pct}%;background:${pct===100?'var(--green)':pct>50?'var(--accent)':'var(--blue)'}"></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">${pct}% concluído</div>
       </div>
-      <button class="list-item-delete" onclick="deleteCalendar(${c.id})">❌</button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-function deleteCalendar(id) {
-  state.calendar = state.calendar.filter(c => c.id !== id);
-  localStorage.setItem('jbxhub_calendar', JSON.stringify(state.calendar));
-  renderCalendarList();
-}
-
-// BRIEFINGS
-function saveBriefing() {
-  const client = document.getElementById('briefing-client').value.trim();
-  const project = document.getElementById('briefing-project').value.trim();
-  const content = document.getElementById('briefing-content').value.trim();
-  
-  if (!client || !project || !content) { alert('Preencha todos os campos'); return; }
-  
-  state.briefings.push({ id: Date.now(), client, project, content });
-  localStorage.setItem('jbxhub_briefings', JSON.stringify(state.briefings));
-  
-  document.getElementById('briefing-client').value = '';
-  document.getElementById('briefing-project').value = '';
-  document.getElementById('briefing-content').value = '';
-  
-  renderBriefingsList();
-}
-
-function renderBriefingsList() {
-  const list = document.getElementById('briefings-list');
-  list.innerHTML = state.briefings.map(b => `
-    <div class="list-item">
-      <div>
-        <div style="font-weight: 700;">${b.client} - ${b.project}</div>
-        <div style="font-size: 11px; color: var(--muted);">${b.content.substring(0, 60)}...</div>
+function renderUsers() {
+  const grid = el('users-grid');
+  if (!grid) return;
+  grid.innerHTML = state.users.map(u => {
+    const colors = ['#8b5cf6','#3b82f6','#10b981','#f97316','#ef4444'];
+    const color = colors[u.name.charCodeAt(0) % colors.length];
+    return `
+      <div class="user-row">
+        <div class="user-row-avatar" style="background:linear-gradient(135deg,${color},${color}99)">${u.name[0].toUpperCase()}</div>
+        <div class="user-row-info">
+          <div class="user-row-name">${u.name}</div>
+          <div class="user-row-email">${u.email}</div>
+          <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-viewer'}">${u.role.toUpperCase()}</span>
+          ${u.sector ? `<span style="font-size:10px;color:var(--muted);margin-left:6px;">${u.sector}</span>` : ''}
+        </div>
+        <div class="online-dot ${u.online ? '' : 'offline-dot'}" title="${u.online ? 'Online' : 'Offline'}"></div>
+        ${u.id !== '1' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">✕</button>` : ''}
       </div>
-      <button class="list-item-delete" onclick="deleteBriefing(${b.id})">❌</button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-function deleteBriefing(id) {
-  state.briefings = state.briefings.filter(b => b.id !== id);
-  localStorage.setItem('jbxhub_briefings', JSON.stringify(state.briefings));
-  renderBriefingsList();
+function updateNavBadge() {
+  el('nav-badge-total').textContent = state.tasks.length;
 }
 
-// PROMPTS
-function savePrompt() {
-  const name = document.getElementById('prompt-name').value.trim();
-  const content = document.getElementById('prompt-content').value.trim();
-  
-  if (!name || !content) { alert('Preencha todos os campos'); return; }
-  
-  state.prompts.push({ id: Date.now(), name, content });
-  localStorage.setItem('jbxhub_prompts', JSON.stringify(state.prompts));
-  
-  document.getElementById('prompt-name').value = '';
-  document.getElementById('prompt-content').value = '';
-  
-  renderPromptsList();
+// ═══════════════════════════════════════════════════════════════
+// TASK CRUD
+// ═══════════════════════════════════════════════════════════════
+function saveTask(col) {
+  const title = el(`title-${col}`).value.trim();
+  if (!title) { toast('Digite o nome da tarefa', 'error'); return; }
+  const sector   = el(`sector-${col}`).value;
+  const priority = el(`priority-${col}`).value;
+  const urgent   = el(`urgent-${col}`).checked;
+  const deadline = el(`date-${col}`).value;
+
+  state.tasks.push({ id: uid(), col, title, sector, urgent, priority, deadline, desc:'', notes:'', files:[] });
+  closeForm(col);
+  saveState();
+  render();
+  toast(`"${title}" criada!`, 'success');
 }
 
-function renderPromptsList() {
-  const list = document.getElementById('prompts-list');
-  list.innerHTML = state.prompts.map(p => `
-    <div class="list-item" onclick="copyToClipboard('${p.content.replace(/'/g, "\\'")}')">
-      <div style="cursor: pointer; flex: 1;">
-        <div style="font-weight: 700;">${p.name}</div>
-        <div style="font-size: 11px; color: var(--muted);">${p.content.substring(0, 60)}...</div>
+function saveFromModal() {
+  const title  = el('modal-title').value.trim();
+  const sector = el('modal-sector').value;
+  if (!title)  { toast('Digite o título', 'error'); return; }
+  if (!sector) { toast('Selecione um setor', 'error'); return; }
+
+  state.tasks.push({
+    id: uid(),
+    col: el('modal-col').value,
+    title,
+    sector,
+    priority: el('modal-priority').value,
+    deadline: el('modal-deadline').value,
+    urgent: el('modal-urgent').checked,
+    desc: el('modal-desc').value,
+    notes: '',
+    files: []
+  });
+
+  closeModal('modal-newtask');
+  el('modal-title').value = '';
+  el('modal-sector').value = '';
+  el('modal-deadline').value = '';
+  el('modal-desc').value = '';
+  el('modal-urgent').checked = false;
+
+  saveState();
+  render();
+  toast('Tarefa criada com sucesso!', 'success');
+}
+
+function deleteTask(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  if (!confirm(`Deletar "${task.title}"?`)) return;
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  saveState();
+  render();
+  toast('Tarefa deletada', 'info');
+}
+
+// ── DETAIL MODAL ──
+function openDetail(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  state.detailTaskId = id;
+
+  el('detail-title').textContent = task.title;
+  el('detail-title-input').value = task.title;
+  el('detail-col').value = task.col;
+  el('detail-notes').value = task.notes || '';
+
+  const tagsEl = el('detail-tags');
+  tagsEl.innerHTML = `
+    <span class="task-tag tag-sector">${task.sector}</span>
+    <span class="task-tag task-tag tag-priority-${task.priority}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} prioridade</span>
+    ${task.urgent ? `<span class="task-tag tag-urgent">🚨 URGENTE</span>` : ''}
+    ${task.deadline ? `<span class="task-tag" style="background:rgba(251,191,36,0.1);color:var(--yellow);">📅 ${fmtDate(task.deadline)}</span>` : ''}
+  `;
+
+  renderDetailAttachments(task);
+  openModal('modal-detail');
+}
+
+function editTaskTitle() {
+  const titleEl = el('detail-title');
+  const inputEl = el('detail-title-input');
+  const btnEdit = document.querySelector('[onclick="editTaskTitle()"]');
+  
+  if (inputEl.style.display === 'none') {
+    titleEl.style.display = 'none';
+    inputEl.style.display = 'block';
+    inputEl.focus();
+    inputEl.select();
+  }
+}
+
+function handleTitleKeydown(e) {
+  if (e.key === 'Enter') {
+    saveTitleEdit();
+  } else if (e.key === 'Escape') {
+    cancelTitleEdit();
+  }
+}
+
+function saveTitleEdit() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  
+  const newTitle = el('detail-title-input').value.trim();
+  if (!newTitle) {
+    toast('O título não pode estar vazio', 'error');
+    el('detail-title-input').value = task.title;
+    return;
+  }
+  
+  task.title = newTitle;
+  el('detail-title').textContent = newTitle;
+  el('detail-title').style.display = 'block';
+  el('detail-title-input').style.display = 'none';
+  saveState();
+  render();
+  toast('Título atualizado!', 'success');
+}
+
+function cancelTitleEdit() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (task) {
+    el('detail-title-input').value = task.title;
+    el('detail-title').style.display = 'block';
+    el('detail-title-input').style.display = 'none';
+  }
+}
+
+function renderDetailAttachments(task) {
+  const list = el('detail-attachments');
+  if (!task.files || task.files.length === 0) {
+    list.innerHTML = `<span style="font-size:11px;color:var(--muted);">Sem anexos</span>`;
+  } else {
+    list.innerHTML = task.files.map((f, i) => {
+      const fileName = typeof f === 'string' ? f : f.name;
+      const fileSize = typeof f === 'string' ? '' : ` (${(f.size / 1024).toFixed(1)}KB)`;
+      const hasData = typeof f !== 'string' && f.data;
+      return `
+        <div class="attachment-item">
+          <span class="attach-icon">📎</span>
+          <span style="flex:1;font-size:11px;">${fileName}${fileSize}</span>
+          ${hasData ? `<button onclick="previewFile('${task.id}',${i})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;" title="Visualizar">🔍</button>` : ''}
+          ${hasData ? `<button onclick="downloadFile('${task.id}',${i})" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;" title="Baixar">⬇️</button>` : ''}
+          <button onclick="removeFile('${task.id}',${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;" title="Remover">✕</button>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+function moveTaskDetail() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (task) {
+    task.col = el('detail-col').value;
+    saveState();
+    render();
+    toast(`Movida para ${COL_LABELS[task.col]}`, 'info');
+  }
+}
+
+function saveDetailNotes() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (task) { task.notes = el('detail-notes').value; saveState(); }
+}
+
+function handleFileAttach(input) {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  
+  Array.from(input.files).forEach(f => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const fileData = {
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        data: e.target.result // Base64 encoded
+      };
+      if (!task.files) task.files = [];
+      task.files.push(fileData);
+      renderDetailAttachments(task);
+      saveState();
+      render();
+      toast(`"${f.name}" anexado com sucesso!`, 'success');
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function removeFile(id, idx) {
+  const task = state.tasks.find(t => t.id === id);
+  if (task) { task.files.splice(idx, 1); renderDetailAttachments(task); saveState(); render(); }
+}
+
+function previewFile(taskId, fileIdx) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task || !task.files[fileIdx]) return;
+  
+  const file = task.files[fileIdx];
+  if (typeof file === 'string') { toast('Arquivo sem dados', 'error'); return; }
+  
+  const fileName = file.name.toLowerCase();
+  const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(fileName);
+  const isPdf = /\.pdf$/i.test(fileName);
+  const isText = /\.(txt|md|json|xml|csv)$/i.test(fileName);
+  
+  let content = '';
+  if (isImage) {
+    content = `<img src="${file.data}" style="max-width:100%;max-height:70vh;border-radius:8px;">`;
+  } else if (isPdf) {
+    content = `<iframe src="${file.data}" style="width:100%;height:70vh;border:none;border-radius:8px;"></iframe>`;
+  } else if (isText) {
+    const text = atob(file.data.split(',')[1] || '');
+    content = `<pre style="background:var(--card);padding:16px;border-radius:8px;overflow-y:auto;max-height:70vh;font-size:12px;">${text}</pre>`;
+  } else {
+    content = `<div style="text-align:center;padding:40px;color:var(--muted);"><div style="font-size:48px;margin-bottom:16px;">📄</div><div>Arquivo: ${file.name}</div><div style="font-size:12px;margin-top:8px;">${(file.size / 1024).toFixed(1)}KB</div><button class="btn btn-primary" onclick="downloadFile('${taskId}',${fileIdx}); closeModal('modal-preview')" style="margin-top:16px;">⬇️ Baixar</button></div>`;
+  }
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'modal-preview';
+  modal.onclick = (e) => { if (e.target === modal) closeModal('modal-preview'); };
+  modal.innerHTML = `
+    <div class="modal" style="max-width:90vw;max-height:80vh;overflow:auto;">
+      <button class="modal-close-x" onclick="closeModal('modal-preview')">✕</button>
+      <div style="margin-bottom:16px;">
+        <strong>${file.name}</strong> <span style="color:var(--muted);font-size:12px;">(${(file.size / 1024).toFixed(1)}KB)</span>
       </div>
-      <button class="list-item-delete" onclick="deletePrompt(${p.id}); event.stopPropagation();">❌</button>
+      ${content}
     </div>
-  `).join('');
+  `;
+  document.body.appendChild(modal);
 }
 
-function deletePrompt(id) {
-  state.prompts = state.prompts.filter(p => p.id !== id);
-  localStorage.setItem('jbxhub_prompts', JSON.stringify(state.prompts));
-  renderPromptsList();
-}
-
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text);
-  alert('✅ Copiado para a área de transferência!');
-}
-
-// APPROVALS
-function saveApproval() {
-  const name = document.getElementById('approval-name').value.trim();
-  const status = document.getElementById('approval-status').value;
-  const notes = document.getElementById('approval-notes').value.trim();
+function downloadFile(taskId, fileIdx) {
+  const task = state.tasks.find(t => t.id === taskId);
+  if (!task || !task.files[fileIdx]) return;
   
-  if (!name) { alert('Digite o nome da arte'); return; }
+  const file = task.files[fileIdx];
+  if (typeof file === 'string') { toast('Arquivo sem dados', 'error'); return; }
   
-  state.approvals.push({ id: Date.now(), name, status, notes, date: new Date().toLocaleDateString('pt-BR') });
-  localStorage.setItem('jbxhub_approvals', JSON.stringify(state.approvals));
-  
-  document.getElementById('approval-name').value = '';
-  document.getElementById('approval-status').value = 'Pendente';
-  document.getElementById('approval-notes').value = '';
-  
-  renderApprovalsList();
+  const link = document.createElement('a');
+  link.href = file.data;
+  link.download = file.name;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast(`"${file.name}" baixado!`, 'success');
 }
 
-function renderApprovalsList() {
-  const list = document.getElementById('approvals-list');
-  list.innerHTML = state.approvals.map(a => `
-    <div class="list-item">
-      <div style="flex: 1;">
-        <div style="font-weight: 700;">${a.name} - ${a.status}</div>
-        <div style="font-size: 11px; color: var(--muted);">${a.date}</div>
-      </div>
-      <button class="list-item-delete" onclick="deleteApproval(${a.id})">❌</button>
-    </div>
-  `).join('');
+function deleteFromDetail() {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  if (!confirm(`Deletar "${task.title}"?`)) return;
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  closeModal('modal-detail');
+  saveState();
+  render();
+  toast('Tarefa deletada', 'info');
 }
 
-function deleteApproval(id) {
-  state.approvals = state.approvals.filter(a => a.id !== id);
-  localStorage.setItem('jbxhub_approvals', JSON.stringify(state.approvals));
-  renderApprovalsList();
+// ── USERS ──
+function saveUser() {
+  const name  = el('user-name').value.trim();
+  const email = el('user-email').value.trim();
+  if (!name || !email) { toast('Preencha nome e email', 'error'); return; }
+  if (state.users.find(u => u.email === email)) { toast('Email já cadastrado', 'error'); return; }
+
+  state.users.push({
+    id: uid(),
+    name,
+    email,
+    role: el('user-role').value,
+    sector: el('user-sector').value,
+    online: false
+  });
+
+  closeModal('modal-user');
+  el('user-name').value = '';
+  el('user-email').value = '';
+  saveState();
+  renderUsers();
+  toast(`${name} criado!`, 'success');
 }
 
+function deleteUser(id) {
+  const u = state.users.find(x => x.id === id);
+  if (!u || !confirm(`Deletar usuário "${u.name}"?`)) return;
+  state.users = state.users.filter(x => x.id !== id);
+  saveState();
+  renderUsers();
+  toast('Usuário removido', 'info');
+}
+
+// ── SETTINGS ACTIONS ──
+function exportData() {
+  const data = JSON.stringify({ tasks: state.tasks, users: state.users }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `jbxhub_export_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Dados exportados!', 'success');
+}
+
+function clearAllData() {
+  if (!confirm('Tem certeza? Isso apagará TODAS as tarefas e usuários (exceto Admin).')) return;
+  state.tasks = [];
+  state.users = state.users.filter(u => u.id === '1');
+  saveState();
+  render();
+  toast('Dados limpos', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════════════════════
+let dragId = null;
+
+function onDragStart(e, id) {
+  dragId = id;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragEnd(e) { e.target.classList.remove('dragging'); }
+
+function onDragOver(e, colEl) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  colEl.classList.add('drag-over');
+}
+function onDragLeave(colEl) { colEl.classList.remove('drag-over'); }
+
+function onDrop(e, col) {
+  e.preventDefault();
+  document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
+  if (!dragId) return;
+  const task = state.tasks.find(t => t.id === dragId);
+  if (task && task.col !== col) {
+    task.col = col;
+    saveState();
+    render();
+    toast(`Movida para ${COL_LABELS[col]}`, 'info');
+  }
+  dragId = null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILTER / SEARCH / VIEWS
+// ═══════════════════════════════════════════════════════════════
+function setFilter(sector, btn) {
+  state.filter = sector;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  el('filter-badge').textContent = sector === 'all' ? 'Tudo' : sector;
+
+  document.querySelectorAll('[id^="nav-sector-"]').forEach(i => i.classList.remove('active'));
+  const sectorNavEl = document.getElementById('nav-sector-' + sector);
+  if (sectorNavEl) sectorNavEl.classList.add('active');
+
+  renderKanban();
+}
+
+function filterAndGo(sector, navEl) {
+  state.filter = sector;
+  el('filter-badge').textContent = sector === 'all' ? 'Tudo' : sector;
+
+  document.querySelectorAll('.filter-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.sector === sector);
+  });
+
+  document.querySelectorAll('[id^="nav-sector-"]').forEach(i => i.classList.remove('active'));
+  const sectorNavEl = document.getElementById('nav-sector-' + sector);
+  if (sectorNavEl) sectorNavEl.classList.add('active');
+
+  showView('kanban', navEl);
+  renderKanban();
+}
+
+function onSearch() {
+  state.search = el('searchInput').value;
+  renderKanban();
+}
+
+function showView(id, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  el(`view-${id}`).classList.add('active');
+  if (navEl) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+  const titles = {
+    dashboard: 'Dashboard <span>Visão Geral</span>',
+    kanban: 'Quadro de Tarefas',
+    designers: 'Recursos para Designers',
+    users: 'Usuários',
+    settings: 'Configurações'
+  };
+  el('topbar-title').innerHTML = titles[id] || id;
+
+  // Atualiza preview do logo na tela de settings
+  if (id === 'settings') {
+    const savedLogo = localStorage.getItem('jbxhub_logo');
+    const preview = el('settings-logo-preview');
+    if (preview) {
+      if (savedLogo) {
+        preview.innerHTML = `<img src="${savedLogo}" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">`;
+      } else {
+        preview.textContent = 'JBX';
+        preview.style.background = 'linear-gradient(135deg,var(--accent),#c2410c)';
+      }
+    }
+    // Atualiza badge Firebase
+    const fb = window._fb;
+    const settingsBadge = el('settings-firebase-status');
+    if (settingsBadge) {
+      if (fb && fb.enabled) {
+        settingsBadge.className = 'firebase-badge online';
+        settingsBadge.textContent = '✅ Conectado';
+      } else {
+        settingsBadge.className = 'firebase-badge offline';
+        settingsBadge.textContent = '⚠️ Não configurado';
+      }
+    }
+  }
+}
+
+// ── SIDEBAR ──
+function toggleSidebar() {
+  const s = el('sidebar');
+  s.classList.toggle('collapsed');
+  const btn = s.querySelector('.collapse-btn');
+  btn.textContent = s.classList.contains('collapsed') ? '⇒ Expandir' : '⇐ Recolher';
+}
+
+// ── MODAL HELPERS ──
+function openModal(id)  { el(id).classList.add('open'); }
+function closeModal(id) { el(id).classList.remove('open'); }
+function closeModalOverlay(e, id) { if (e.target.classList.contains('modal-overlay')) closeModal(id); }
+function openNewTaskModal() { openModal('modal-newtask'); }
+function openUserModal()    { openModal('modal-user'); }
+
+// ── FORM HELPERS ──
+function openForm(col) {
+  el(`form-${col}`).classList.add('open');
+  el(`btn-add-${col}`).style.display = 'none';
+  el(`title-${col}`).focus();
+}
+function closeForm(col) {
+  el(`form-${col}`).classList.remove('open');
+  el(`btn-add-${col}`).style.display = 'block';
+  el(`title-${col}`).value = '';
+  el(`urgent-${col}`).checked = false;
+  el(`date-${col}`).value = '';
+}
+
+// ── TOAST ──
+function toast(msg, type = 'info') {
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type]}</span> ${msg}`;
+  el('toasts').appendChild(t);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transition = 'opacity 0.3s';
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
+}
+
+// ── UTILS ──
+function el(id) { return document.getElementById(id); }
+function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function fmtDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
+
+// ── SIMULATE ONLINE STATUS ──
+function simulateActivity() {
+  state.users.forEach((u, i) => {
+    if (i > 0 && Math.random() < 0.15) { u.online = !u.online; }
+  });
+  renderUsers();
+}
+
+// ═══════════════════════════════════════════════════════════════
 // INIT
+// ═══════════════════════════════════════════════════════════════
 function initApp() {
-  setTheme(state.theme);
-  renderDashboard();
+  loadState();
+  loadLogo();
+  loadThemeSettings();
+  initCharts();
+  render();
+
+  // Aguarda Firebase SDK carregar (módulo ES6 é assíncrono)
+  const tryFirebase = (attempts = 0) => {
+    if (window._fb !== undefined) {
+      setupFirebase();
+    } else if (attempts < 20) {
+      setTimeout(() => tryFirebase(attempts + 1), 200);
+    }
+  };
+  tryFirebase();
+
+  setInterval(() => { simulateActivity(); }, 8000);
+
+  // Close mobile menu when clicking nav items
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', closeMobileMenu);
+  });
 }
 
-// Enter no login
-document.addEventListener('DOMContentLoaded', () => {
-  const loginPwd = document.getElementById('login-password');
-  if (loginPwd) {
-    loginPwd.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') doLogin();
-    });
+// ═══════════════════════════════════════════════════════════════
+// TEMA E PERSONALIZAÇÃO
+// ═══════════════════════════════════════════════════════════════
+function toggleTheme(theme) {
+  state.theme = theme;
+  document.body.className = theme === 'light' ? 'theme-light' : '';
+  localStorage.setItem('jbxhub_theme', theme);
+  
+  // Atualiza botões no settings
+  document.querySelectorAll('.theme-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.theme === theme);
+  });
+  
+  toast(`Tema ${theme === 'light' ? 'Claro' : 'Escuro'} ativado`, 'info');
+}
+
+function loadThemeSettings() {
+  const savedTheme = localStorage.getItem('jbxhub_theme') || 'dark';
+  toggleTheme(savedTheme);
+  
+  const savedBgType = localStorage.getItem('jbxhub_bg_type') || 'color';
+  const savedBgColor = localStorage.getItem('jbxhub_bg_color') || '#0b0e17';
+  const savedBgImage = localStorage.getItem('jbxhub_bg_image') || '';
+  
+  applyBackground(savedBgType, savedBgType === 'color' ? savedBgColor : savedBgImage);
+}
+
+function applyBackground(type, value) {
+  state.bgType = type;
+  document.body.dataset.bgType = type;
+  
+  if (type === 'color') {
+    state.bgColor = value;
+    document.body.style.backgroundColor = value;
+    document.body.style.backgroundImage = 'none';
+    localStorage.setItem('jbxhub_bg_color', value);
+  } else {
+    state.bgImage = value;
+    document.body.style.backgroundImage = `url(${value})`;
+    localStorage.setItem('jbxhub_bg_image', value);
+  }
+  
+  localStorage.setItem('jbxhub_bg_type', type);
+}
+
+function handleBgUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    applyBackground('image', ev.target.result);
+    toast('Imagem de fundo atualizada!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function setBgColor(color) {
+  applyBackground('color', color);
+  toast('Cor de fundo atualizada!', 'success');
+}
+
+// Carrega logo na tela de login antes do app iniciar
+loadLogo();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen') && !document.getElementById('login-screen').classList.contains('hidden')) {
+    doLogin();
+    return;
+  }
+  if (e.key === 'n' && !['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) {
+    e.preventDefault();
+    openNewTaskModal();
+  }
+  if (e.key === 'Escape') {
+    ['modal-newtask','modal-detail','modal-user'].forEach(closeModal);
   }
 });
 </script>
-
 </body>
 </html>
