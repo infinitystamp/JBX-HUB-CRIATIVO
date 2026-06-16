@@ -2177,11 +2177,22 @@ body[data-bg-type="color"] {
         <div id="urgent-list" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
       </div>
 
-      <div>
-        <h3 style="font-size:13px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
-          📦 Progresso por Setor
-        </h3>
-        <div id="sector-progress" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 350px;gap:20px;margin-top:20px;">
+        <div>
+          <h3 style="font-size:13px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+            📦 Progresso por Setor
+          </h3>
+          <div id="sector-progress" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
+        </div>
+        
+        <!-- Mini Calendário Dashboard -->
+        <div class="card" style="padding:16px;">
+          <h3 style="font-size:13px;margin-bottom:12px;">📅 Próximos Eventos</h3>
+          <div id="dashboard-calendar-mini" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:12px;color:var(--muted);text-align:center;padding:20px;">Carregando eventos...</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px;" onclick="showView('designers')">Ver Calendário Completo</button>
+        </div>
       </div>
     </div>
 
@@ -2341,16 +2352,11 @@ body[data-bg-type="color"] {
             <div class="designer-card-title">Biblioteca de Marcas</div>
           </div>
           <div class="designer-card-desc">Identidades visuais, logos e paletas de cores organizadas por cliente.</div>
-          <div class="brand-library">
-            <div class="brand-item">
-              <div class="brand-logo">JBX</div>
-              <div class="brand-name">JBX Sports</div>
-            </div>
-            <div class="brand-item">
-              <div class="brand-logo">🛒</div>
-              <div class="brand-name">Marketplace</div>
-            </div>
-          </div>
+          <div style="background:var(--card2);border-radius:10px;padding:12px;text-align:center;margin-top:10px;">
+          <div style="font-size:24px;margin-bottom:8px;">🎨</div>
+          <div style="font-size:11px;font-weight:700;color:var(--accent);">CANVA INTEGRADO</div>
+          <div style="font-size:10px;color:var(--muted);">Acesse todos os seus designs diretamente aqui.</div>
+        </div>
         </div>
 
         <!-- Calendário Editorial -->
@@ -2360,11 +2366,9 @@ body[data-bg-type="color"] {
             <div class="designer-card-title">Calendário Editorial</div>
           </div>
           <div class="designer-card-desc">Planejamento de postagens e campanhas de social media.</div>
-          <div class="calendar-wrapper">
-            <div class="calendar-grid">
-              <div class="calendar-day">1</div><div class="calendar-day has-event">2</div><div class="calendar-day">3</div>
-              <div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div><div class="calendar-day">7</div>
-            </div>
+          <div style="background:var(--card2);border-radius:10px;padding:12px;text-align:center;margin-top:10px;">
+            <div style="font-size:11px;font-weight:700;color:var(--accent);">SISTEMA DE EVENTOS ATIVO</div>
+            <div style="font-size:10px;color:var(--muted);">Clique para gerenciar datas e postagens.</div>
           </div>
         </div>
 
@@ -2375,33 +2379,6 @@ body[data-bg-type="color"] {
             <div class="designer-card-title">Central de Briefings</div>
           </div>
           <div class="designer-card-desc">Formulários e solicitações detalhadas para novos projetos.</div>
-          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px;">📄 Ver Briefings Ativos</button>
-        </div>
-
-        <!-- Aprovações -->
-        <div class="designer-card" onclick="openDesignerResource('aprovacoes')">
-          <div class="designer-card-header">
-            <div class="designer-card-icon">⚖️</div>
-            <div class="designer-card-title">Área de Aprovações</div>
-          </div>
-          <div class="designer-card-desc">Controle de qualidade e aprovação final de artes e campanhas.</div>
-          <div style="display:flex;gap:6px;margin-top:10px;">
-            <span class="approval-status pending">⏳ 3 Pendentes</span>
-            <span class="approval-status approved">✅ 12 Aprovadas</span>
-          </div>
-        </div>
-
-        <!-- IA Prompts -->
-        <div class="designer-card" onclick="openDesignerResource('prompts')">
-          <div class="designer-card-header">
-            <div class="designer-card-icon">🤖</div>
-            <div class="designer-card-title">Prompts de IA</div>
-          </div>
-          <div class="designer-card-desc">Biblioteca de prompts reutilizáveis para geração de imagens e textos.</div>
-          <div class="designer-card-meta">
-            <span class="designer-badge">Midjourney</span>
-            <span class="designer-badge">ChatGPT</span>
-          </div>
         </div>
 
         <!-- Referências -->
@@ -2427,7 +2404,14 @@ body[data-bg-type="color"] {
     <!-- ═══════════ IA HUB VIEW ═══════════ -->
     <div class="view" id="view-ia-hub">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <h2 style="font-size:15px;font-weight:700;">🤖 IA Hub — Geração de Imagens & Chat</h2>
+        <h2 style="font-size:15px;font-weight:700;">🤖 IA Hub — Central Multi-IAs</h2>
+        <div style="display:flex;gap:8px;">
+          <select id="ia-provider-select" onchange="switchIAProvider(this.value)" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;font-size:12px;">
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="nanobanana">Nano Banana</option>
+          </select>
+        </div>
       </div>
       
       <div style="display:grid;grid-template-columns:350px 1fr;gap:20px;height:calc(100vh - 180px);">
@@ -2444,7 +2428,7 @@ body[data-bg-type="color"] {
           <div id="ia-chat-container" style="display:flex;flex-direction:column;gap:12px;flex:1;">
             <div id="ia-chat-history" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:5px;font-size:13px;">
               <div style="background:var(--card2);padding:10px;border-radius:10px;border-bottom-left-radius:0;max-width:90%;">
-                Olá! Sou seu assistente criativo. Como posso ajudar hoje?
+                Olá! Estou conectado via <strong id="active-ia-label">OpenAI</strong>. Como posso ajudar?
               </div>
             </div>
             <div style="display:flex;gap:8px;">
@@ -2453,28 +2437,18 @@ body[data-bg-type="color"] {
             </div>
           </div>
 
-          <!-- Área de Imagem (oculta por padrão) -->
+          <!-- Área de Imagem -->
           <div id="ia-image-container" style="display:none;flex-direction:column;gap:16px;">
             <div>
               <label style="display:block;margin-bottom:8px;font-weight:700;font-size:12px;color:var(--muted);">PROMPT DA IMAGEM</label>
               <textarea id="ia-prompt" placeholder="Descreva a imagem que deseja gerar..." style="width:100%;height:100px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:inherit;resize:none;"></textarea>
             </div>
-            <div>
-              <label style="display:block;margin-bottom:8px;font-weight:700;font-size:12px;color:var(--muted);">ESTILO</label>
-              <select id="ia-style" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);">
-                <option value="photorealistic">Fotorrealista</option>
-                <option value="digital-art">Arte Digital</option>
-                <option value="3d-render">Render 3D</option>
-                <option value="anime">Anime / Ilustração</option>
-                <option value="minimalist">Minimalista</option>
-              </select>
-            </div>
             <button class="btn btn-primary" onclick="generateIAImage()" id="ia-gen-btn" style="width:100%;padding:14px;font-size:14px;">✨ Gerar Imagem</button>
           </div>
           
           <div style="padding:12px;background:rgba(59,130,246,0.1);border-radius:10px;border:1px solid rgba(59,130,246,0.2);">
-            <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:4px;">DICA DE OURO</div>
-            <div style="font-size:11px;color:var(--muted2);line-height:1.4;">A API Key deve ser configurada em 'Configurações' para que as IAs funcionem.</div>
+            <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:4px;">STATUS DO PROVEDOR</div>
+            <div id="ia-provider-status" style="font-size:11px;color:var(--muted2);line-height:1.4;">Pronto para uso.</div>
           </div>
         </div>
 
@@ -2509,17 +2483,51 @@ body[data-bg-type="color"] {
     <div class="view" id="view-settings">
       <h2 style="font-size:15px;font-weight:700;">⚙️ Configurações</h2>
 
-      <!-- OpenAI API -->
+      <!-- Multi-IA Config -->
       <div class="settings-section">
-        <h3>🤖 Integração OpenAI (ChatGPT & DALL-E)</h3>
+        <h3>🤖 Configurações de IA (Multi-Provedores)</h3>
+        
+        <!-- OpenAI -->
         <div class="settings-row">
           <div>
-            <div class="settings-row-label">Chave de API (OpenAI Key)</div>
-            <div class="settings-row-desc">Necessário para o IA Hub funcionar. Obtenha em <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent);">platform.openai.com</a></div>
+            <div class="settings-row-label">OpenAI (ChatGPT & DALL-E)</div>
+            <div class="settings-row-desc">Status: <span id="status-openai" style="color:var(--muted);">Inativo</span></div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input type="password" class="settings-input" id="settings-openai-key" placeholder="sk-..." style="min-width:240px;">
-            <button class="btn btn-primary btn-sm" onclick="saveOpenAIKey()">Conectar</button>
+            <select id="settings-openai-model" onchange="state.aiConfig.openai.model=this.value;saveState();" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px;">
+              <option value="gpt-3.5-turbo">GPT-3.5</option>
+              <option value="gpt-4-turbo">GPT-4</option>
+            </select>
+            <input type="password" class="settings-input" id="settings-openai-key" placeholder="sk-..." style="min-width:150px;">
+            <button class="btn btn-primary btn-sm" onclick="saveAIKey('openai')">Salvar</button>
+          </div>
+        </div>
+
+        <!-- Gemini -->
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Google Gemini</div>
+            <div class="settings-row-desc">Status: <span id="status-gemini" style="color:var(--muted);">Inativo</span>. Obtenha em <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent);">aistudio.google.com</a></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="settings-gemini-model" onchange="state.aiConfig.gemini.model=this.value;saveState();" style="background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px;">
+              <option value="gemini-pro">Gemini Pro</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            </select>
+            <input type="password" class="settings-input" id="settings-gemini-key" placeholder="AIza..." style="min-width:150px;">
+            <button class="btn btn-primary btn-sm" onclick="saveAIKey('gemini')">Salvar</button>
+          </div>
+        </div>
+
+        <!-- Nano Banana -->
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Nano Banana</div>
+            <div class="settings-row-desc">Status: <span id="status-nanobanana" style="color:var(--muted);">Inativo</span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="password" class="settings-input" id="settings-nanobanana-key" placeholder="Key..." style="min-width:150px;">
+            <button class="btn btn-primary btn-sm" onclick="saveAIKey('nanobanana')">Salvar</button>
           </div>
         </div>
       </div>
@@ -2778,6 +2786,35 @@ body[data-bg-type="color"] {
   </div>
 </div>
 
+<!-- ═══════════ MODAL: EVENTO CALENDÁRIO ═══════════ -->
+<div class="modal-overlay" id="modal-event" onclick="closeModalOverlay(event,'modal-event')">
+  <div class="modal" style="width:450px;">
+    <button class="modal-close-x" onclick="closeModal('modal-event')">✕</button>
+    <h2 id="event-modal-title">📅 Novo Evento</h2>
+    <input type="hidden" id="event-id">
+    
+    <label>Título do Evento *</label>
+    <input type="text" id="event-title" placeholder="Ex: Lançamento Campanha X">
+    
+    <label>Data *</label>
+    <input type="date" id="event-date">
+    
+    <label>Descrição</label>
+    <textarea id="event-desc" rows="3" placeholder="Detalhes do evento..."></textarea>
+    
+    <label>Banner / Logo do Evento (URL)</label>
+    <input type="text" id="event-banner" placeholder="https://link-da-imagem.com/foto.jpg">
+    <div style="font-size:10px;color:var(--muted);margin-top:4px;">Cole o link de uma imagem para exibir no calendário e dashboard.</div>
+
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-danger btn-sm" id="btn-delete-event" onclick="deleteEvent()" style="display:none;">Excluir</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" onclick="closeModal('modal-event')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Salvar Evento</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toasts"></div>
 
@@ -2803,6 +2840,17 @@ let state = {
   filter: 'all',
   search: '',
   detailTaskId: null,
+  currentCalDate: new Date(),
+  calendarEvents: [
+    { id: 'e1', title: 'Lançamento Coleção Inverno', date: '2026-06-16', banner: '', desc: 'Postagem principal social media' },
+    { id: 'e2', title: 'Flash Sale Marketplace', date: '2026-06-22', banner: '', desc: 'Campanha de 24h' }
+  ],
+  aiConfig: {
+    activeProvider: 'openai',
+    openai: { key: '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', enabled: true, model: 'gpt-3.5-turbo' },
+    gemini: { key: '', enabled: false, model: 'gemini-pro' },
+    nanobanana: { key: '', enabled: false, model: 'nano-1' }
+  },
   tasks: [
     { id:'1', col:'solicitado', title:'Identidade Visual Verão', sector:'Loja', urgent:true, priority:'alta', deadline:'2026-06-15', desc:'Criar nova identidade visual para coleção verão.', notes:'', files:[] },
     { id:'2', col:'producao', title:'Camisetas Oficiais Estampa', sector:'Personalizados', urgent:false, priority:'media', deadline:'2026-06-20', desc:'', notes:'Aguardando aprovação do briefing.', files:[] },
@@ -3115,6 +3163,7 @@ function render() {
   updateCharts();
   updateNavBadge();
   updateOnlineCounter();
+  renderDashboardCalendar();
 }
 
 function updateOnlineCounter() {
@@ -3349,21 +3398,12 @@ function openDetail(id) {
 // ── DESIGNER RESOURCES ──
 const DESIGNER_RESOURCES = {
   marcas: {
-    title: '📁 Biblioteca de Marcas',
+    title: '🎨 Biblioteca de Marcas (Canva)',
     content: `
-      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));gap:15px;">
-        <div class="brand-item">
-          <div class="brand-logo" style="background:#000;color:#fff;">JBX</div>
-          <div class="brand-name">JBX Sports</div>
-          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:5px;">Ver Brandbook</button>
-        </div>
-        <div class="brand-item">
-          <div class="brand-logo" style="background:#f97316;color:#fff;">🛒</div>
-          <div class="brand-name">Marketplace</div>
-          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:5px;">Paleta de Cores</button>
-        </div>
-        <div class="brand-item" style="border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;height:150px;cursor:pointer;">
-          <span style="font-size:24px;">➕</span>
+      <div style="width:100%;height:600px;background:var(--card2);border-radius:12px;overflow:hidden;position:relative;">
+        <iframe src="https://www.canva.com" style="width:100%;height:100%;border:none;" title="Canva Integration"></iframe>
+        <div style="position:absolute;bottom:10px;right:10px;background:var(--accent);color:white;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+          INTEGRAÇÃO CANVA ATIVA
         </div>
       </div>
     `
@@ -3371,38 +3411,17 @@ const DESIGNER_RESOURCES = {
   calendario: {
     title: '📅 Calendário Editorial',
     content: `
-      <div style="background:var(--card2);padding:15px;border-radius:12px;margin-bottom:15px;">
+      <div id="calendar-full-container">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-          <span style="font-weight:700;">Junho 2026</span>
-          <div style="display:flex;gap:5px;">
-            <button class="btn btn-ghost btn-sm">◀</button>
-            <button class="btn btn-ghost btn-sm">▶</button>
+          <h3 id="cal-month-title" style="font-size:16px;">Junho 2026</h3>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="changeCalendarMonth(-1)">◀</button>
+            <button class="btn btn-primary btn-sm" onclick="openEventModal()">＋ Novo Evento</button>
+            <button class="btn btn-ghost btn-sm" onclick="changeCalendarMonth(1)">▶</button>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:5px;text-align:center;">
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">DOM</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">SEG</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">TER</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">QUA</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">QUI</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">SEX</div>
-          <div style="font-size:10px;color:var(--muted);font-weight:700;">SÁB</div>
-          ${Array.from({length: 30}, (_, i) => `
-            <div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;background:var(--card);border:1px solid var(--border);position:relative;${i+1===16?'border-color:var(--accent);background:rgba(249,115,22,0.1);':''}">
-              ${i+1}
-              ${[5, 12, 16, 22].includes(i+1) ? '<div style="position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></div>' : ''}
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      <div style="font-size:13px;">
-        <div style="font-weight:700;margin-bottom:8px;">Eventos Próximos:</div>
-        <div style="padding:8px;background:var(--card);border-radius:8px;margin-bottom:5px;border-left:3px solid var(--accent);">
-          <strong>16 Jun:</strong> Lançamento Coleção Inverno (Social Media)
-        </div>
-        <div style="padding:8px;background:var(--card);border-radius:8px;border-left:3px solid var(--blue);">
-          <strong>22 Jun:</strong> Campanha Marketplace Flash Sale
-        </div>
+        <div id="calendar-grid-full" class="calendar-grid" style="grid-template-columns:repeat(7, 1fr);gap:8px;"></div>
+        <div id="calendar-events-list" style="margin-top:20px;display:flex;flex-direction:column;gap:10px;"></div>
       </div>
     `
   },
@@ -3428,71 +3447,28 @@ const DESIGNER_RESOURCES = {
       </div>
     `
   },
-  aprovacoes: {
-    title: '⚖️ Área de Aprovações',
-    content: `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <div style="height:120px;background:#333;display:flex;align-items:center;justify-content:center;color:var(--muted);">PREVIEW ARTE</div>
-          <div style="padding:10px;">
-            <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Banner Inverno v2</div>
-            <div style="display:flex;gap:5px;">
-              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--green);">✅</button>
-              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--red);">❌</button>
-            </div>
-          </div>
-        </div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-          <div style="height:120px;background:#333;display:flex;align-items:center;justify-content:center;color:var(--muted);">PREVIEW ARTE</div>
-          <div style="padding:10px;">
-            <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Logo Evento X</div>
-            <div style="display:flex;gap:5px;">
-              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--green);">✅</button>
-              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--red);">❌</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-  prompts: {
-    title: '🤖 Biblioteca de Prompts',
-    content: `
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="padding:12px;background:var(--card2);border-radius:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:5px;">MIDJOURNEY — REALISMO</div>
-          <div style="font-size:12px;font-family:'JetBrains Mono';background:var(--bg);padding:8px;border-radius:6px;margin-bottom:8px;">
-            /imagine prompt: cinematic photo of a luxury sports car, sunset lighting, 8k resolution, highly detailed --ar 16:9
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="copyText(this.previousElementSibling.innerText)">📋 Copiar</button>
-        </div>
-        <div style="padding:12px;background:var(--card2);border-radius:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:5px;">CHATGPT — COPYWRITING</div>
-          <div style="font-size:12px;font-family:'JetBrains Mono';background:var(--bg);padding:8px;border-radius:6px;margin-bottom:8px;">
-            Atue como um copywriter sênior e crie 5 legendas persuasivas para Instagram sobre o lançamento de uma marca de roupas esportivas.
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="copyText(this.previousElementSibling.innerText)">📋 Copiar</button>
-        </div>
-      </div>
-    `
-  },
+
   referencias: {
     title: '💡 Referências & Inspirações',
     content: `
-      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
-        ${Array.from({length: 6}, (_, i) => `
-          <div style="aspect-ratio:1;background:var(--card2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-            🖼️
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div>
+          <h4 style="font-size:13px;margin-bottom:10px;">Moodboards Ativos</h4>
+          <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+            <div style="aspect-ratio:1;background:url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=200&auto=format&fit=crop');background-size:cover;border-radius:8px;cursor:pointer;" onclick="window.open('https://pinterest.com/search/pins/?q=tech%20design')"></div>
+            <div style="aspect-ratio:1;background:url('https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=200&auto=format&fit=crop');background-size:cover;border-radius:8px;cursor:pointer;" onclick="window.open('https://pinterest.com/search/pins/?q=minimalist%20branding')"></div>
+            <div style="border:2px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:20px;cursor:pointer;">＋</div>
           </div>
-        `).join('')}
-      </div>
-      <div style="margin-top:15px;padding:12px;background:var(--card);border-radius:10px;font-size:13px;">
-        <div style="font-weight:700;margin-bottom:5px;">Links Úteis:</div>
-        <ul style="padding-left:20px;color:var(--accent);">
-          <li><a href="https://behance.net" target="_blank" style="color:inherit;">Behance</a></li>
-          <li><a href="https://dribbble.com" target="_blank" style="color:inherit;">Dribbble</a></li>
-          <li><a href="https://pinterest.com" target="_blank" style="color:inherit;">Pinterest Boards</a></li>
-        </ul>
+        </div>
+        <div>
+          <h4 style="font-size:13px;margin-bottom:10px;">Atalhos de Design</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <a href="https://behance.net" target="_blank" class="btn btn-ghost btn-sm" style="justify-content:flex-start;text-decoration:none;">🌐 Behance</a>
+            <a href="https://pinterest.com" target="_blank" class="btn btn-ghost btn-sm" style="justify-content:flex-start;text-decoration:none;">🌐 Pinterest</a>
+            <a href="https://dribbble.com" target="_blank" class="btn btn-ghost btn-sm" style="justify-content:flex-start;text-decoration:none;">🌐 Dribbble</a>
+            <a href="https://fonts.google.com" target="_blank" class="btn btn-ghost btn-sm" style="justify-content:flex-start;text-decoration:none;">🌐 Google Fonts</a>
+          </div>
+        </div>
       </div>
     `
   }
@@ -3505,6 +3481,177 @@ function openDesignerResource(type) {
   el('designer-modal-title').textContent = resource.title;
   el('designer-modal-content').innerHTML = resource.content;
   openModal('modal-designer-resource');
+  
+  if (type === 'calendario') {
+    renderFullCalendar();
+  }
+}
+
+// ── CALENDAR LOGIC ──
+function renderFullCalendar() {
+  const grid = el('calendar-grid-full');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  const date = state.currentCalDate;
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  
+  const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  el('cal-month-title').textContent = `${monthNames[month]} ${year}`;
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // Dias vazios no início
+  for (let i = 0; i < firstDay; i++) {
+    grid.innerHTML += `<div class="calendar-day" style="border:none;opacity:0;"></div>`;
+  }
+  
+  // Dias do mês
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasEvent = state.calendarEvents.some(e => e.date === dStr);
+    grid.innerHTML += `
+      <div class="calendar-day ${hasEvent ? 'has-event' : ''}" onclick="openEventModal('${dStr}')">
+        ${d}
+      </div>
+    `;
+  }
+  
+  renderEventsList();
+}
+
+function renderEventsList() {
+  const list = el('calendar-events-list');
+  if (!list) return;
+  
+  const month = state.currentCalDate.getMonth();
+  const year = state.currentCalDate.getFullYear();
+  
+  const filtered = state.calendarEvents.filter(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d.getMonth() === month && d.getFullYear() === year;
+  }).sort((a,b) => a.date.localeCompare(b.date));
+  
+  if (filtered.length === 0) {
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px;">Nenhum evento este mês</div>`;
+  } else {
+    list.innerHTML = `<h4 style="font-size:12px;margin-bottom:10px;">Eventos do Mês:</h4>` + filtered.map(e => `
+      <div class="event-item" style="background:var(--card2);padding:12px;border-radius:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border-left:4px solid var(--accent);" onclick="openEventModal(null, '${e.id}')">
+        ${e.banner ? `<img src="${e.banner}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">` : `<div style="width:40px;height:40px;background:var(--card);border-radius:6px;display:flex;align-items:center;justify-content:center;">📅</div>`}
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px;">${e.title}</div>
+          <div style="font-size:11px;color:var(--muted);">${fmtDate(e.date)}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">✏️</div>
+      </div>
+    `).join('');
+  }
+}
+
+function changeCalendarMonth(offset) {
+  state.currentCalDate.setMonth(state.currentCalDate.getMonth() + offset);
+  renderFullCalendar();
+}
+
+function openEventModal(dateStr = null, eventId = null) {
+  const modal = el('modal-event');
+  const title = el('event-modal-title');
+  const btnDel = el('btn-delete-event');
+  
+  // Reset
+  el('event-id').value = '';
+  el('event-title').value = '';
+  el('event-date').value = dateStr || '';
+  el('event-desc').value = '';
+  el('event-banner').value = '';
+  btnDel.style.display = 'none';
+  
+  if (eventId) {
+    const e = state.calendarEvents.find(x => x.id === eventId);
+    if (e) {
+      el('event-id').value = e.id;
+      el('event-title').value = e.title;
+      el('event-date').value = e.date;
+      el('event-desc').value = e.desc || '';
+      el('event-banner').value = e.banner || '';
+      title.textContent = '✏️ Editar Evento';
+      btnDel.style.display = 'block';
+    }
+  } else {
+    title.textContent = '📅 Novo Evento';
+  }
+  
+  openModal('modal-event');
+}
+
+function saveEvent() {
+  const id = el('event-id').value;
+  const title = el('event-title').value.trim();
+  const date = el('event-date').value;
+  
+  if (!title || !date) { toast('Título e data são obrigatórios', 'error'); return; }
+  
+  const eventData = {
+    id: id || uid(),
+    title,
+    date,
+    desc: el('event-desc').value,
+    banner: el('event-banner').value
+  };
+  
+  if (id) {
+    const idx = state.calendarEvents.findIndex(e => e.id === id);
+    state.calendarEvents[idx] = eventData;
+  } else {
+    state.calendarEvents.push(eventData);
+  }
+  
+  saveState();
+  closeModal('modal-event');
+  renderFullCalendar();
+  renderDashboardCalendar();
+  toast('Evento salvo!', 'success');
+}
+
+function deleteEvent() {
+  const id = el('event-id').value;
+  if (!id || !confirm('Excluir este evento?')) return;
+  
+  state.calendarEvents = state.calendarEvents.filter(e => e.id !== id);
+  saveState();
+  closeModal('modal-event');
+  renderFullCalendar();
+  renderDashboardCalendar();
+  toast('Evento excluído', 'info');
+}
+
+function renderDashboardCalendar() {
+  const container = el('dashboard-calendar-mini');
+  if (!container) return;
+  
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = state.calendarEvents
+    .filter(e => e.date >= today)
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .slice(0, 3);
+    
+  if (upcoming.length === 0) {
+    container.innerHTML = `<div style="color:var(--muted);font-size:12px;">Sem eventos próximos</div>`;
+  } else {
+    container.innerHTML = upcoming.map(e => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--card2);border-radius:8px;margin-bottom:6px;">
+        <div style="width:30px;height:30px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:white;flex-shrink:0;">
+          ${e.date.split('-')[2]}
+        </div>
+        <div style="flex:1;overflow:hidden;">
+          <div style="font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.title}</div>
+          <div style="font-size:10px;color:var(--muted);">${fmtDate(e.date)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
 }
 
 function copyText(text) {
@@ -3541,64 +3688,78 @@ function setIAMode(mode) {
   }
 }
 
-function saveOpenAIKey() {
-  const key = el('settings-openai-key').value.trim();
+function saveAIKey(provider) {
+  const key = el(`settings-${provider}-key`).value.trim();
   if (!key) { toast('Insira uma chave válida', 'error'); return; }
-  localStorage.setItem('jbxhub_openai_key', key);
-  toast('Chave OpenAI salva com sucesso!', 'success');
+  state.aiConfig[provider].key = key;
+  state.aiConfig[provider].enabled = true;
+  saveState();
+  updateAIStatusUI();
+  toast(`Chave ${provider.toUpperCase()} salva!`, 'success');
 }
 
-function getOpenAIKey() {
-  return localStorage.getItem('jbxhub_openai_key') || '';
+function updateAIStatusUI() {
+  ['openai', 'gemini', 'nanobanana'].forEach(p => {
+    const s = el(`status-${p}`);
+    if (s) {
+      const active = state.aiConfig[p].enabled;
+      s.textContent = active ? 'Ativo' : 'Inativo';
+      s.style.color = active ? 'var(--green)' : 'var(--muted)';
+    }
+  });
+}
+
+function switchIAProvider(provider) {
+  state.aiConfig.activeProvider = provider;
+  el('active-ia-label').textContent = provider.charAt(0).toUpperCase() + provider.slice(1);
+  el('ia-provider-status').textContent = state.aiConfig[provider].enabled ? 'Provedor ativo e pronto.' : 'Atenção: Configure a chave deste provedor.';
+  saveState();
 }
 
 async function sendIAChat() {
   const input = el('ia-chat-input');
   const message = input.value.trim();
-  const apiKey = getOpenAIKey();
+  const provider = state.aiConfig.activeProvider;
+  const config = state.aiConfig[provider];
   
   if (!message) return;
-  if (!apiKey) { toast('Configure a API Key nas Configurações', 'error'); return; }
+  if (!config.key) { toast(`Configure a chave do ${provider.toUpperCase()} nas Configurações`, 'error'); return; }
   
   input.value = '';
   const history = el('ia-chat-history');
-  
-  // Adiciona mensagem do usuário
-  history.innerHTML += `
-    <div style="align-self:flex-end;background:var(--accent);color:white;padding:10px;border-radius:10px;border-bottom-right-radius:0;max-width:90%;">
-      ${message}
-    </div>
-  `;
+  history.innerHTML += `<div style="align-self:flex-end;background:var(--accent);color:white;padding:10px;border-radius:10px;border-bottom-right-radius:0;max-width:90%;">${message}</div>`;
   history.scrollTop = history.scrollHeight;
   
   el('ia-loader').style.display = 'flex';
-  el('ia-loader-text').textContent = 'ChatGPT está pensando...';
+  el('ia-loader-text').textContent = `${provider.toUpperCase()} está processando...`;
   
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: message }]
-      })
-    });
+    let reply = '';
+    if (provider === 'openai') {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
+        body: JSON.stringify({ model: config.model, messages: [{ role: 'user', content: message }] })
+      });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message);
+      reply = data.choices[0].message.content;
+    } else if (provider === 'gemini') {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${config.key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: message }] }] })
+      });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message);
+      reply = data.candidates[0].content.parts[0].text;
+    } else {
+      reply = `O provedor ${provider} está em fase de implementação de API.`;
+    }
     
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
-    
-    const reply = data.choices[0].message.content;
-    
-    history.innerHTML += `
-      <div style="background:var(--card2);padding:10px;border-radius:10px;border-bottom-left-radius:0;max-width:90%;line-height:1.4;">
-        ${reply.replace(/\n/g, '<br>')}
-      </div>
-    `;
+    history.innerHTML += `<div style="background:var(--card2);padding:10px;border-radius:10px;border-bottom-left-radius:0;max-width:90%;line-height:1.4;">${reply.replace(/\n/g, '<br>')}</div>`;
   } catch (e) {
-    toast('Erro no Chat: ' + e.message, 'error');
+    toast('Erro: ' + e.message, 'error');
   } finally {
     el('ia-loader').style.display = 'none';
     history.scrollTop = history.scrollHeight;
@@ -3607,11 +3768,12 @@ async function sendIAChat() {
 
 async function generateIAImage() {
   const prompt = el('ia-prompt').value.trim();
-  const style = el('ia-style').value;
-  const apiKey = getOpenAIKey();
+  const provider = state.aiConfig.activeProvider;
+  const config = state.aiConfig[provider];
   
   if (!prompt) { toast('Descreva a imagem primeiro!', 'error'); return; }
-  if (!apiKey) { toast('Configure a API Key nas Configurações', 'error'); return; }
+  if (provider !== 'openai') { toast('Geração de imagem disponível apenas via OpenAI (DALL-E)', 'info'); return; }
+  if (!config.key) { toast('Configure a chave da OpenAI nas Configurações', 'error'); return; }
   
   const btn = el('ia-gen-btn');
   const loader = el('ia-loader');
@@ -3625,19 +3787,10 @@ async function generateIAImage() {
   placeholder.style.display = 'none';
   
   try {
-    const fullPrompt = `${prompt}, style: ${style}, high quality, detailed, 4k`;
-    
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        prompt: fullPrompt,
-        n: 1,
-        size: '1024x1024'
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.key}` },
+      body: JSON.stringify({ prompt, n: 1, size: '1024x1024' })
     });
     
     const data = await response.json();
@@ -3658,10 +3811,14 @@ async function generateIAImage() {
 
 // Inicializa a chave no input se existir
 window.addEventListener('DOMContentLoaded', () => {
-  const savedKey = localStorage.getItem('jbxhub_openai_key');
-  if (savedKey && el('settings-openai-key')) {
-    el('settings-openai-key').value = savedKey;
-  }
+  // Carrega chaves de IA do estado para os inputs
+  if (el('settings-openai-key')) el('settings-openai-key').value = state.aiConfig.openai.key;
+  if (el('settings-gemini-key')) el('settings-gemini-key').value = state.aiConfig.gemini.key;
+  if (el('settings-nanobanana-key')) el('settings-nanobanana-key').value = state.aiConfig.nanobanana.key;
+  if (el('ia-provider-select')) el('ia-provider-select').value = state.aiConfig.activeProvider;
+  
+  updateAIStatusUI();
+  renderDashboardCalendar();
 });
 
 function updateDetailField(field, value) {
