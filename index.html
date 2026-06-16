@@ -121,10 +121,14 @@ body.theme-light #login-screen {
   animation: loginIn 0.4s cubic-bezier(0.23,1,0.32,1);
   box-shadow: 0 24px 80px rgba(0,0,0,0.5);
 }
-@keyframes loginIn {
-  from { opacity:0; transform: scale(0.95) translateY(16px); }
-  to   { opacity:1; transform: none; }
-}
+  @keyframes loginIn {
+    from { opacity:0; transform: scale(0.95) translateY(16px); }
+    to   { opacity:1; transform: none; }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 
 .login-logo {
   display: flex;
@@ -2027,6 +2031,11 @@ body[data-bg-type="color"] {
         <div class="nav-label">Designers</div>
         <div class="nav-badge" style="background:var(--purple)">NOVO</div>
       </div>
+      <div class="nav-item" onclick="showView('ia-hub', this)">
+        <div class="nav-icon">🤖</div>
+        <div class="nav-label">IA Hub</div>
+        <div class="nav-badge" style="background:var(--blue)">PRO</div>
+      </div>
       <div class="nav-item" onclick="showView('users', this)">
         <div class="nav-icon">👥</div>
         <div class="nav-label">Usuários</div>
@@ -2326,7 +2335,7 @@ body[data-bg-type="color"] {
       
       <div class="designer-grid">
         <!-- Biblioteca de Marcas -->
-        <div class="designer-card">
+        <div class="designer-card" onclick="openDesignerResource('marcas')">
           <div class="designer-card-header">
             <div class="designer-card-icon">📁</div>
             <div class="designer-card-title">Biblioteca de Marcas</div>
@@ -2345,7 +2354,7 @@ body[data-bg-type="color"] {
         </div>
 
         <!-- Calendário Editorial -->
-        <div class="designer-card">
+        <div class="designer-card" onclick="openDesignerResource('calendario')">
           <div class="designer-card-header">
             <div class="designer-card-icon">📅</div>
             <div class="designer-card-title">Calendário Editorial</div>
@@ -2360,7 +2369,7 @@ body[data-bg-type="color"] {
         </div>
 
         <!-- Central de Briefings -->
-        <div class="designer-card">
+        <div class="designer-card" onclick="openDesignerResource('briefings')">
           <div class="designer-card-header">
             <div class="designer-card-icon">📝</div>
             <div class="designer-card-title">Central de Briefings</div>
@@ -2370,7 +2379,7 @@ body[data-bg-type="color"] {
         </div>
 
         <!-- Aprovações -->
-        <div class="designer-card">
+        <div class="designer-card" onclick="openDesignerResource('aprovacoes')">
           <div class="designer-card-header">
             <div class="designer-card-icon">⚖️</div>
             <div class="designer-card-title">Área de Aprovações</div>
@@ -2383,7 +2392,7 @@ body[data-bg-type="color"] {
         </div>
 
         <!-- IA Prompts -->
-        <div class="designer-card">
+        <div class="designer-card" onclick="openDesignerResource('prompts')">
           <div class="designer-card-header">
             <div class="designer-card-icon">🤖</div>
             <div class="designer-card-title">Prompts de IA</div>
@@ -2396,7 +2405,7 @@ body[data-bg-type="color"] {
         </div>
 
         <!-- Referências -->
-        <div class="designer-card">
+        <div class="designer-card" onclick="openDesignerResource('referencias')">
           <div class="designer-card-header">
             <div class="designer-card-icon">💡</div>
             <div class="designer-card-title">Referências & Inspirações</div>
@@ -2413,6 +2422,66 @@ body[data-bg-type="color"] {
         <button class="btn btn-primary" onclick="openUserModal()">＋ Criar Usuário</button>
       </div>
       <div class="users-grid" id="users-grid"></div>
+    </div>
+
+    <!-- ═══════════ IA HUB VIEW ═══════════ -->
+    <div class="view" id="view-ia-hub">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h2 style="font-size:15px;font-weight:700;">🤖 IA Hub — Geração de Imagens & Chat</h2>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:350px 1fr;gap:20px;height:calc(100vh - 180px);">
+        <!-- Painel de Geração -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:16px;">
+          <div>
+            <label style="display:block;margin-bottom:8px;font-weight:700;font-size:12px;color:var(--muted);">PROMPT DA IMAGEM</label>
+            <textarea id="ia-prompt" placeholder="Descreva a imagem que deseja gerar..." style="width:100%;height:120px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:inherit;resize:none;"></textarea>
+          </div>
+          
+          <div>
+            <label style="display:block;margin-bottom:8px;font-weight:700;font-size:12px;color:var(--muted);">ESTILO</label>
+            <select id="ia-style" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);">
+              <option value="photorealistic">Fotorrealista</option>
+              <option value="digital-art">Arte Digital</option>
+              <option value="3d-render">Render 3D</option>
+              <option value="anime">Anime / Ilustração</option>
+              <option value="minimalist">Minimalista</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" onclick="generateIAImage()" id="ia-gen-btn" style="width:100%;padding:14px;font-size:14px;">✨ Gerar Imagem</button>
+          
+          <div style="margin-top:auto;padding:12px;background:rgba(59,130,246,0.1);border-radius:10px;border:1px solid rgba(59,130,246,0.2);">
+            <div style="font-size:11px;color:var(--blue);font-weight:700;margin-bottom:4px;">DICA DE OURO</div>
+            <div style="font-size:11px;color:var(--muted2);line-height:1.4;">Para melhores resultados, use termos em inglês e descreva iluminação e enquadramento.</div>
+          </div>
+        </div>
+
+        <!-- Resultado -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+          <div id="ia-result-placeholder" style="text-align:center;color:var(--muted);">
+            <div style="font-size:48px;margin-bottom:16px;">🖼️</div>
+            <p>Sua imagem aparecerá aqui</p>
+          </div>
+          <img id="ia-result-img" style="display:none;width:100%;height:100%;object-fit:contain;">
+          <div id="ia-loader" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+            <div style="width:40px;height:40px;border:3px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div>
+            <span style="font-weight:700;font-size:13px;">A IA está criando sua arte...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: RECURSOS DESIGNER -->
+    <div class="modal-overlay" id="modal-designer-resource" onclick="closeModalOverlay(event,'modal-designer-resource')">
+      <div class="modal" style="width:600px;max-height:80vh;overflow-y:auto;">
+        <button class="modal-close-x" onclick="closeModal('modal-designer-resource')">✕</button>
+        <h2 id="designer-modal-title">Recurso</h2>
+        <div id="designer-modal-content" style="margin-top:20px;"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeModal('modal-designer-resource')">Fechar</button>
+        </div>
+      </div>
     </div>
 
     <!-- ═══════════ SETTINGS VIEW ═══════════ -->
@@ -2587,15 +2656,47 @@ body[data-bg-type="color"] {
     </div>
     <input type="text" id="detail-title-input" style="display:none;width:100%;padding:10px;border:1px solid var(--accent);border-radius:8px;background:#0d1120;color:var(--text);font-size:16px;font-weight:700;margin-bottom:16px;" onkeydown="handleTitleKeydown(event)" onblur="saveTitleEdit()">
 
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="detail-tags"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div>
+        <label>Setor</label>
+        <select id="detail-sector" onchange="updateDetailField('sector', this.value)">
+          <option value="Loja">Loja</option>
+          <option value="Eventos">Eventos</option>
+          <option value="Personalizados">Personalizados</option>
+          <option value="Marketplace">Marketplace</option>
+          <option value="Instituto">Instituto</option>
+          <option value="JBX Estruturas">JBX Estruturas</option>
+        </select>
+      </div>
+      <div>
+        <label>Prioridade</label>
+        <select id="detail-priority" onchange="updateDetailField('priority', this.value)">
+          <option value="baixa">🟢 Baixa</option>
+          <option value="media">🟡 Média</option>
+          <option value="alta">🔴 Alta</option>
+        </select>
+      </div>
+      <div>
+        <label>Prazo (Deadline)</label>
+        <input type="date" id="detail-deadline" onchange="updateDetailField('deadline', this.value)">
+      </div>
+      <div>
+        <label>Status / Coluna</label>
+        <select id="detail-col" onchange="moveTaskDetail()">
+          <option value="solicitado">📥 Solicitado</option>
+          <option value="producao">🎨 Produção</option>
+          <option value="aprovacao">📤 Ag. Aprovação</option>
+          <option value="finalizado">✅ Finalizado</option>
+        </select>
+      </div>
+    </div>
 
-    <label>Mover para coluna</label>
-    <select id="detail-col" onchange="moveTaskDetail()">
-      <option value="solicitado">📥 Solicitado</option>
-      <option value="producao">🎨 Produção</option>
-      <option value="aprovacao">📤 Ag. Aprovação</option>
-      <option value="finalizado">✅ Finalizado</option>
-    </select>
+    <div style="margin-bottom:16px;">
+      <label class="form-check" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="checkbox" id="detail-urgent" onchange="updateDetailField('urgent', this.checked)"> 
+        <span style="font-weight:700;color:var(--red);">🚨 Marcar como Urgente</span>
+      </label>
+    </div>
 
     <label>Notas / Observações</label>
     <textarea class="notes-area" id="detail-notes" placeholder="Escreva notas sobre esta tarefa..." rows="3" onchange="saveDetailNotes()"></textarea>
@@ -3198,17 +3299,233 @@ function openDetail(id) {
   el('detail-title-input').value = task.title;
   el('detail-col').value = task.col;
   el('detail-notes').value = task.notes || '';
-
-  const tagsEl = el('detail-tags');
-  tagsEl.innerHTML = `
-    <span class="task-tag tag-sector">${task.sector}</span>
-    <span class="task-tag task-tag tag-priority-${task.priority}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} prioridade</span>
-    ${task.urgent ? `<span class="task-tag tag-urgent">🚨 URGENTE</span>` : ''}
-    ${task.deadline ? `<span class="task-tag" style="background:rgba(251,191,36,0.1);color:var(--yellow);">📅 ${fmtDate(task.deadline)}</span>` : ''}
-  `;
+  
+  // Novos campos de edição
+  el('detail-sector').value = task.sector;
+  el('detail-priority').value = task.priority || 'media';
+  el('detail-deadline').value = task.deadline || '';
+  el('detail-urgent').checked = !!task.urgent;
 
   renderDetailAttachments(task);
   openModal('modal-detail');
+}
+
+// ── DESIGNER RESOURCES ──
+const DESIGNER_RESOURCES = {
+  marcas: {
+    title: '📁 Biblioteca de Marcas',
+    content: `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));gap:15px;">
+        <div class="brand-item">
+          <div class="brand-logo" style="background:#000;color:#fff;">JBX</div>
+          <div class="brand-name">JBX Sports</div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:5px;">Ver Brandbook</button>
+        </div>
+        <div class="brand-item">
+          <div class="brand-logo" style="background:#f97316;color:#fff;">🛒</div>
+          <div class="brand-name">Marketplace</div>
+          <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:5px;">Paleta de Cores</button>
+        </div>
+        <div class="brand-item" style="border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;height:150px;cursor:pointer;">
+          <span style="font-size:24px;">➕</span>
+        </div>
+      </div>
+    `
+  },
+  calendario: {
+    title: '📅 Calendário Editorial',
+    content: `
+      <div style="background:var(--card2);padding:15px;border-radius:12px;margin-bottom:15px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+          <span style="font-weight:700;">Junho 2026</span>
+          <div style="display:flex;gap:5px;">
+            <button class="btn btn-ghost btn-sm">◀</button>
+            <button class="btn btn-ghost btn-sm">▶</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:5px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">DOM</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">SEG</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">TER</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">QUA</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">QUI</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">SEX</div>
+          <div style="font-size:10px;color:var(--muted);font-weight:700;">SÁB</div>
+          ${Array.from({length: 30}, (_, i) => `
+            <div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;background:var(--card);border:1px solid var(--border);position:relative;${i+1===16?'border-color:var(--accent);background:rgba(249,115,22,0.1);':''}">
+              ${i+1}
+              ${[5, 12, 16, 22].includes(i+1) ? '<div style="position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--accent);"></div>' : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div style="font-size:13px;">
+        <div style="font-weight:700;margin-bottom:8px;">Eventos Próximos:</div>
+        <div style="padding:8px;background:var(--card);border-radius:8px;margin-bottom:5px;border-left:3px solid var(--accent);">
+          <strong>16 Jun:</strong> Lançamento Coleção Inverno (Social Media)
+        </div>
+        <div style="padding:8px;background:var(--card);border-radius:8px;border-left:3px solid var(--blue);">
+          <strong>22 Jun:</strong> Campanha Marketplace Flash Sale
+        </div>
+      </div>
+    `
+  },
+  briefings: {
+    title: '📝 Central de Briefings',
+    content: `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="padding:15px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;">Briefing: Identidade Visual</div>
+            <div style="font-size:12px;color:var(--muted);">Enviado por: Marketing · Há 2 horas</div>
+          </div>
+          <button class="btn btn-primary btn-sm">Abrir</button>
+        </div>
+        <div style="padding:15px;background:var(--card);border:1px solid var(--border);border-radius:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;">Briefing: Campanha Julho</div>
+            <div style="font-size:12px;color:var(--muted);">Enviado por: Comercial · Ontem</div>
+          </div>
+          <button class="btn btn-primary btn-sm">Abrir</button>
+        </div>
+        <button class="btn btn-ghost" style="border:2px dashed var(--border);padding:15px;">➕ Criar Novo Formulário de Briefing</button>
+      </div>
+    `
+  },
+  aprovacoes: {
+    title: '⚖️ Área de Aprovações',
+    content: `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <div style="height:120px;background:#333;display:flex;align-items:center;justify-content:center;color:var(--muted);">PREVIEW ARTE</div>
+          <div style="padding:10px;">
+            <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Banner Inverno v2</div>
+            <div style="display:flex;gap:5px;">
+              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--green);">✅</button>
+              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--red);">❌</button>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+          <div style="height:120px;background:#333;display:flex;align-items:center;justify-content:center;color:var(--muted);">PREVIEW ARTE</div>
+          <div style="padding:10px;">
+            <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Logo Evento X</div>
+            <div style="display:flex;gap:5px;">
+              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--green);">✅</button>
+              <button class="btn btn-primary btn-sm" style="flex:1;background:var(--red);">❌</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  prompts: {
+    title: '🤖 Biblioteca de Prompts',
+    content: `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="padding:12px;background:var(--card2);border-radius:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:5px;">MIDJOURNEY — REALISMO</div>
+          <div style="font-size:12px;font-family:'JetBrains Mono';background:var(--bg);padding:8px;border-radius:6px;margin-bottom:8px;">
+            /imagine prompt: cinematic photo of a luxury sports car, sunset lighting, 8k resolution, highly detailed --ar 16:9
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="copyText(this.previousElementSibling.innerText)">📋 Copiar</button>
+        </div>
+        <div style="padding:12px;background:var(--card2);border-radius:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:5px;">CHATGPT — COPYWRITING</div>
+          <div style="font-size:12px;font-family:'JetBrains Mono';background:var(--bg);padding:8px;border-radius:6px;margin-bottom:8px;">
+            Atue como um copywriter sênior e crie 5 legendas persuasivas para Instagram sobre o lançamento de uma marca de roupas esportivas.
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="copyText(this.previousElementSibling.innerText)">📋 Copiar</button>
+        </div>
+      </div>
+    `
+  },
+  referencias: {
+    title: '💡 Referências & Inspirações',
+    content: `
+      <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;">
+        ${Array.from({length: 6}, (_, i) => `
+          <div style="aspect-ratio:1;background:var(--card2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🖼️
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:15px;padding:12px;background:var(--card);border-radius:10px;font-size:13px;">
+        <div style="font-weight:700;margin-bottom:5px;">Links Úteis:</div>
+        <ul style="padding-left:20px;color:var(--accent);">
+          <li><a href="https://behance.net" target="_blank" style="color:inherit;">Behance</a></li>
+          <li><a href="https://dribbble.com" target="_blank" style="color:inherit;">Dribbble</a></li>
+          <li><a href="https://pinterest.com" target="_blank" style="color:inherit;">Pinterest Boards</a></li>
+        </ul>
+      </div>
+    `
+  }
+};
+
+function openDesignerResource(type) {
+  const resource = DESIGNER_RESOURCES[type];
+  if (!resource) return;
+  
+  el('designer-modal-title').textContent = resource.title;
+  el('designer-modal-content').innerHTML = resource.content;
+  openModal('modal-designer-resource');
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+  toast('Copiado para a área de transferência!', 'success');
+}
+
+// ── IA HUB LOGIC ──
+async function generateIAImage() {
+  const prompt = el('ia-prompt').value.trim();
+  const style = el('ia-style').value;
+  
+  if (!prompt) {
+    toast('Descreva a imagem primeiro!', 'error');
+    return;
+  }
+  
+  const btn = el('ia-gen-btn');
+  const loader = el('ia-loader');
+  const img = el('ia-result-img');
+  const placeholder = el('ia-result-placeholder');
+  
+  btn.disabled = true;
+  loader.style.display = 'flex';
+  img.style.display = 'none';
+  placeholder.style.display = 'none';
+  
+  try {
+    // Simulação de chamada de API para o Hub (já que é um frontend estático)
+    // Em um cenário real, aqui seria o fetch para a API da OpenAI/Midjourney
+    // Vou simular um delay e mostrar uma imagem de exemplo de alta qualidade
+    await new Promise(r => setTimeout(r, 3000));
+    
+    // Usando o Unsplash Source para simular uma geração baseada no prompt
+    const randomId = Math.floor(Math.random() * 1000);
+    const imageUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop`;
+    
+    img.src = imageUrl;
+    img.style.display = 'block';
+    toast('Imagem gerada com sucesso!', 'success');
+  } catch (e) {
+    toast('Erro ao gerar imagem. Tente novamente.', 'error');
+    placeholder.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    loader.style.display = 'none';
+  }
+}
+
+function updateDetailField(field, value) {
+  const id = state.detailTaskId;
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  
+  task[field] = value;
+  saveState();
+  render();
 }
 
 function editTaskTitle() {
@@ -3536,6 +3853,7 @@ function showView(id, navEl) {
     dashboard: 'Dashboard <span>Visão Geral</span>',
     kanban: 'Quadro de Tarefas',
     designers: 'Recursos para Designers',
+    'ia-hub': 'IA Hub — Criativo',
     users: 'Usuários',
     settings: 'Configurações'
   };
